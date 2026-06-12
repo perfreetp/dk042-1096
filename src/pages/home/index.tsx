@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, Input, ScrollView, Image, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import SectionHeader from '@/components/SectionHeader';
 import ItemCard from '@/components/ItemCard';
 import BuildingCard from '@/components/BuildingCard';
-import { itemsData, recommendItems } from '@/data/items';
 import { buildingsData, rulesData } from '@/data/buildings';
-import { currentUser } from '@/data/user';
 import type { ItemCategory } from '@/types';
+import useAppStore from '@/store';
 
 const categories = [
   { key: 'tools', name: '工具设备', icon: '🔧' },
@@ -22,6 +21,10 @@ const categories = [
 ];
 
 const HomePage: React.FC = () => {
+  const items = useAppStore(state => state.items);
+  const currentUser = useAppStore(state => state.currentUser);
+  const toggleFavorite = useAppStore(state => state.toggleFavorite);
+
   const [searchKeyword, setSearchKeyword] = useState('');
   const [activeCategory, setActiveCategory] = useState<ItemCategory | 'all'>('all');
 
@@ -43,8 +46,10 @@ const HomePage: React.FC = () => {
 
   const handleFavorite = (itemId: string) => {
     console.log('[Home] Toggling favorite for item:', itemId);
+    toggleFavorite(itemId);
+    const isFav = items.find(i => i.id === itemId)?.isFavorite;
     Taro.showToast({
-      title: '收藏状态已更新',
+      title: isFav ? '已取消收藏' : '已收藏',
       icon: 'success'
     });
   };
@@ -61,12 +66,19 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
-  const displayItems = activeCategory === 'all'
-    ? itemsData.filter(i => i.status === 'available')
-    : itemsData.filter(i => i.category === activeCategory && i.status === 'available');
+  const displayItems = useMemo(() =>
+      activeCategory === 'all'
+      ? items.filter(i => i.status === 'available')
+      : items.filter(i => i.category === activeCategory && i.status === 'available'),
+    [items, activeCategory]
+  );
 
-  const topItems = itemsData.filter(i => i.isTop);
-  const availableCount = itemsData.filter(i => i.status === 'available').length;
+  const topItems = useMemo(() => items.filter(i => i.isTop), [items]);
+  const availableCount = useMemo(() => items.filter(i => i.status === 'available').length, [items]);
+  const recommendItems = useMemo(() =>
+    items.filter(i => i.tags.some(t => t.includes('热门'))).slice(0, 6),
+    [items]
+  );
 
   return (
     <ScrollView className={styles.page} scrollY>

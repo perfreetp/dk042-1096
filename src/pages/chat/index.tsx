@@ -3,10 +3,10 @@ import { View, Text, Image, Input, Button, ScrollView, Textarea } from '@tarojs/
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
-import { chatMessagesData, contactsData, currentUser } from '@/data/user';
-import { itemsData } from '@/data/items';
+import { chatMessagesData, currentUser } from '@/data/user';
 import { formatDate, generateId, formatDeposit } from '@/utils';
-import type { ChatMessage, Contact } from '@/types';
+import type { ChatMessage } from '@/types';
+import useAppStore from '@/store';
 
 interface DisplayMessage extends ChatMessage {
   displayTime?: string;
@@ -25,28 +25,39 @@ const quickReplies = [
 
 const ChatPage: React.FC = () => {
   const routerParams = Taro.useRouter().params;
-  const contactId = routerParams.contactId || 'c1';
+
+  const contactId = routerParams.contactId || '';
+  const userId = routerParams.userId || '';
+  const userName = routerParams.userName ? decodeURIComponent(routerParams.userName) : '';
+  const userAvatar = routerParams.userAvatar ? decodeURIComponent(routerParams.userAvatar) : '';
+  const userBuilding = routerParams.userBuilding ? decodeURIComponent(routerParams.userBuilding) : '';
   const contactNameParam = routerParams.contactName ? decodeURIComponent(routerParams.contactName) : '';
   const itemId = routerParams.itemId || '';
+
+  const items = useAppStore(state => state.items);
+  const getOrCreateContact = useAppStore(state => state.getOrCreateContact);
   const scrollRef = useRef<any>(null);
 
-  const contact: Contact = useMemo(() => {
-    const found = contactsData.find(c => c.id === contactId);
-    if (found) return found;
-    return {
-      id: contactId,
-      userId: 'u' + contactId,
-      name: contactNameParam || '邻居',
-      avatar: 'https://picsum.photos/id/1005/200/200',
-      building: '3栋',
-      roomNumber: '1单元1201'
-    };
-  }, [contactId, contactNameParam]);
+  const contact = useMemo(() => {
+    if (contactId) {
+      const contacts = useAppStore.getState().contacts;
+      const found = contacts.find(c => c.id === contactId);
+      if (found) return found;
+    }
+
+    const targetUserId = userId || 'u' + Math.random().toString(36).slice(2, 8);
+    return getOrCreateContact(targetUserId, {
+      name: userName || contactNameParam || '邻居',
+      avatar: userAvatar || 'https://picsum.photos/id/1005/200/200',
+      building: userBuilding || '',
+      roomNumber: ''
+    });
+  }, [contactId, userId, userName, userAvatar, userBuilding, contactNameParam, getOrCreateContact]);
 
   const relatedItem = useMemo(() => {
     if (!itemId) return null;
-    return itemsData.find(i => i.id === itemId) || null;
-  }, [itemId]);
+    return items.find(i => i.id === itemId) || null;
+  }, [items, itemId]);
 
   const [messages, setMessages] = useState<DisplayMessage[]>(() =>
     chatMessagesData.map((m, idx) => ({

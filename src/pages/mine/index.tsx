@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, Image, Button, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
-import { currentUser } from '@/data/user';
-import { borrowRecordsData } from '@/data/borrowRecords';
-import { itemsData } from '@/data/items';
+import useAppStore from '@/store';
 
 const MinePage: React.FC = () => {
-  const myItems = itemsData.filter(i => ['2', '6'].includes(i.id));
-  const totalDeposits = borrowRecordsData
-    .filter(r => r.borrowerId === 'me' && ['pending_pickup', 'borrowing', 'overdue'].includes(r.status))
-    .reduce((sum, r) => sum + r.deposit, 0);
-  const returnedCount = borrowRecordsData.filter(r => r.borrowerId === 'me' && r.status === 'returned').length;
-  const borrowTotal = borrowRecordsData.filter(r => r.borrowerId === 'me').length;
+  const currentUser = useAppStore(state => state.currentUser);
+  const frozenDeposits = useAppStore(state => state.frozenDeposits);
+  const getMyItems = useAppStore(state => state.getMyItems);
+  const getMyBorrowingRecords = useAppStore(state => state.getMyBorrowingRecords);
+
+  const myItems = useMemo(() => getMyItems(), [getMyItems]);
+  const myBorrowingRecords = useMemo(() => getMyBorrowingRecords(), [getMyBorrowingRecords]);
+
+  const totalDeposits = frozenDeposits;
+  const returnedCount = myBorrowingRecords.filter(r => r.status === 'returned').length;
+  const borrowTotal = myBorrowingRecords.length;
 
   const handleItemClick = (type: string) => {
     console.log('[Mine] Clicked menu item:', type);

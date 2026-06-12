@@ -5,8 +5,8 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import ItemCard from '@/components/ItemCard';
 import EmptyState from '@/components/EmptyState';
-import { itemsData } from '@/data/items';
 import type { ItemCategory, ItemStatus } from '@/types';
+import useAppStore from '@/store';
 
 const categoryOptions = [
   { key: 'all', name: '全部分类' },
@@ -43,12 +43,16 @@ const SearchPage: React.FC = () => {
   const initialCategory = routerParams.category || 'all';
   const type = routerParams.type || '';
 
+  const items = useAppStore(state => state.items);
+  const toggleFavorite = useAppStore(state => state.toggleFavorite);
+  const getMyItems = useAppStore(state => state.getMyItems);
+  const getFavoriteItems = useAppStore(state => state.getFavoriteItems);
+
   const [keyword, setKeyword] = useState(initialKeyword);
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [activeStatus, setActiveStatus] = useState<string>('all');
   const [activeDeposit, setActiveDeposit] = useState<string>('all');
   const [sortType, setSortType] = useState<SortType>('default');
-  const [favoriteMap, setFavoriteMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     console.log('[Search] Page loaded with params:', routerParams);
@@ -60,12 +64,12 @@ const SearchPage: React.FC = () => {
   }, [routerParams, type]);
 
   const filteredItems = useMemo(() => {
-    let result = [...itemsData];
+    let result = [...items];
 
     if (type === 'myItems') {
-      result = result.filter(i => ['2', '6'].includes(i.id));
+      result = getMyItems();
     } else if (type === 'favorites') {
-      result = result.filter(i => i.isFavorite || favoriteMap[i.id]);
+      result = getFavoriteItems();
     }
 
     if (keyword.trim()) {
@@ -105,12 +109,16 @@ const SearchPage: React.FC = () => {
     }
 
     return result;
-  }, [keyword, activeCategory, activeStatus, activeDeposit, sortType, type, favoriteMap]);
+  }, [items, keyword, activeCategory, activeStatus, activeDeposit, sortType, type, getMyItems, getFavoriteItems]);
 
   const handleFavorite = (itemId: string) => {
     console.log('[Search] Toggle favorite:', itemId);
-    setFavoriteMap(prev => ({ ...prev, [itemId]: !prev[itemId] }));
-    Taro.showToast({ title: '收藏状态已更新', icon: 'success' });
+    const item = items.find(i => i.id === itemId);
+    toggleFavorite(itemId);
+    Taro.showToast({
+      title: item?.isFavorite ? '已取消收藏' : '已收藏',
+      icon: 'success'
+    });
   };
 
   const handleCancel = () => {

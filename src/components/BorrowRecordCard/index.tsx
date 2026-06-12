@@ -17,6 +17,7 @@ interface BorrowRecordCardProps {
   onDamageNote?: (recordId: string) => void;
   onRate?: (recordId: string) => void;
   onChat?: (record: BorrowRecord) => void;
+  onCancel?: (recordId: string) => void;
 }
 
 const BorrowRecordCard: React.FC<BorrowRecordCardProps> = ({
@@ -28,7 +29,8 @@ const BorrowRecordCard: React.FC<BorrowRecordCardProps> = ({
   onRemind,
   onDamageNote,
   onRate,
-  onChat
+  onChat,
+  onCancel
 }) => {
   const statusInfo = borrowStatusMap[record.status];
   const isBorrower = role === 'borrower';
@@ -47,6 +49,15 @@ const BorrowRecordCard: React.FC<BorrowRecordCardProps> = ({
 
     if (isBorrower) {
       if (record.status === 'pending_pickup' && !record.isPickupConfirmed) {
+        actions.push(
+          <Button
+            key="cancel"
+            className={classnames(styles.btn, styles.btnDanger)}
+            onClick={() => onCancel?.(record.id)}
+          >
+            取消预约
+          </Button>
+        );
         actions.push(
           <Button
             key="chat"

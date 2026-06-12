@@ -1,13 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, Image, Button, Swiper, SwiperItem, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
-import { itemsData } from '@/data/items';
-import { borrowRecordsData } from '@/data/borrowRecords';
 import { statusMap, formatDeposit } from '@/types';
-import type { Item } from '@/types';
+import useAppStore from '@/store';
 
 const mockBorrowHistory = [
   { id: 'h1', avatar: 'https://picsum.photos/id/1002/100/100', name: '王先生', date: '2026-06-01 至 2026-06-03' },
@@ -19,14 +17,21 @@ const DetailPage: React.FC = () => {
   const routerParams = Taro.useRouter().params;
   const itemId = routerParams.id || '1';
 
-  const [item, setItem] = useState<Item | undefined>(
-    itemsData.find(i => i.id === itemId) || itemsData[0]
-  );
+  const items = useAppStore(state => state.items);
+  const borrowRecords = useAppStore(state => state.borrowRecords);
+  const toggleFavorite = useAppStore(state => state.toggleFavorite);
+  const createBorrowRecord = useAppStore(state => state.createBorrowRecord);
+
   const [currentImage, setCurrentImage] = useState(0);
+
+  const item = useMemo(() =>
+    items.find(i => i.id === itemId),
+    [items, itemId]
+  );
 
   const history = useMemo(() => {
     if (!item) return mockBorrowHistory;
-    const relatedRecords = borrowRecordsData.filter(
+    const relatedRecords = borrowRecords.filter(
       r => r.itemId === item.id && r.status === 'returned'
     );
     if (relatedRecords.length > 0) {
@@ -38,7 +43,11 @@ const DetailPage: React.FC = () => {
       }));
     }
     return mockBorrowHistory;
-  }, [item]);
+  }, [item, borrowRecords]);
+
+  useEffect(() => {
+    console.log('[Detail] Page loaded, itemId:', itemId, 'found:', !!item);
+  }, [itemId, item]);
 
   if (!item) {
     return (
@@ -51,13 +60,14 @@ const DetailPage: React.FC = () => {
   }
 
   const statusInfo = statusMap[item.status];
-  const isAvailable = item.status === 'available';
+  const isAvailable = item.status === 'available' && item.availableQuantity > 0;
 
   const handleFavorite = () => {
     console.log('[Detail] Toggle favorite:', item.id);
-    setItem(prev => prev ? { ...prev, isFavorite: !prev.isFavorite } : prev);
+    const wasFavorited = item.isFavorite;
+    toggleFavorite(item.id);
     Taro.showToast({
-      title: item.isFavorite ? '已取消收藏' : '收藏成功',
+      title: wasFavorited ? '已取消收藏' : '收藏成功',
       icon: 'success'
     });
   };
@@ -65,7 +75,7 @@ const DetailPage: React.FC = () => {
   const handleChat = () => {
     console.log('[Detail] Chat with owner:', item.ownerId);
     Taro.navigateTo({
-      url: `/pages/chat/index?userId=${item.ownerId}&userName=${encodeURIComponent(item.ownerName)}`
+      url: `/pages/chat/index?userId=${item.ownerId}&userName=${encodeURIComponent(item.ownerName)}&userAvatar=${encodeURIComponent(item.ownerAvatar)}&userBuilding=${encodeURIComponent(item.ownerBuilding)}&itemId=${item.id}`
     });
   };
 
@@ -75,25 +85,53 @@ const DetailPage: React.FC = () => {
       Taro.showToast({ title: '该物品暂不可借', icon: 'none' });
       return;
     }
+    if (item.availableQuantity <= 0) {
+      Taro.showToast({ title: '可借数量不足', icon: 'none' });
+      return;
+    }
+
+    const now = new Date();
+    const pickupDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const returnDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    const formatDT = (d: Date) => {
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const h = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${d.getFullYear()}-${m}-${day} ${h}:${min}`;
+    };
+
     Taro.showModal({
       title: '确认预约',
-      content: `您将预约「${item.title}」\n押金：${formatDeposit(item.deposit)}\n取件地点：${item.pickupLocation}`,
+      content: `您将预约「${item.title}」\n押金：${formatDeposit(item.deposit)}\n预计取件：${formatDT(pickupDate)}\n预计归还：${formatDT(returnDate)}\n取件地点：${item.pickupLocation}`,
       confirmText: '确认预约',
+      confirmColor: '#52C41A',
       success: (res) => {
         if (res.confirm) {
           Taro.showLoading({ title: '预约中...' });
-          setTimeout(() => {
-            Taro.hideLoading();
+          const result = createBorrowRecord({
+            itemId: item.id,
+            quantity: 1,
+            pickupTime: formatDT(pickupDate),
+            expectedReturnTime: formatDT(returnDate)
+          });
+          Taro.hideLoading();
+
+          if (result.success) {
             Taro.showModal({
               title: '预约成功',
-              content: '请按时取件，如有疑问请私信邻居~',
+              content: '请按时取件，押金已冻结，如有疑问请私信邻居~',
               showCancel: false,
               confirmText: '去查看',
+              confirmColor: '#52C41A',
               success: () => {
                 Taro.switchTab({ url: '/pages/borrow/index' }).catch(() => {});
               }
             });
-          }, 800);
+          } else {
+            Taro.showToast({ title: result.message, icon: 'none' });
+          }
         }
       }
     });

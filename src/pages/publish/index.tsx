@@ -5,6 +5,7 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import type { ItemCategory } from '@/types';
 import { categoryMap } from '@/types';
+import useAppStore from '@/store';
 
 const categoryOptions = [
   { key: 'tools', name: '工具设备', icon: '🔧' },
@@ -28,6 +29,8 @@ const timeOptions = [
 const depositPresets = [0, 20, 50, 100, 200];
 
 const PublishPage: React.FC = () => {
+  const addItem = useAppStore(state => state.addItem);
+
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -86,9 +89,27 @@ const PublishPage: React.FC = () => {
       return;
     }
 
+    const quantityNum = parseInt(quantity, 10) || 1;
+    const depositNum = parseFloat(deposit) || 0;
+
     Taro.showLoading({ title: '发布中...', mask: true });
 
-    setTimeout(() => {
+    try {
+      addItem({
+        title: title.trim(),
+        description: description.trim() || '暂无描述',
+        images,
+        category,
+        categoryName: categoryMap[category],
+        quantity: quantityNum,
+        availableQuantity: quantityNum,
+        deposit: depositNum,
+        availableTime,
+        pickupLocation: pickupLocation.trim(),
+        wearDesc: wearDesc.trim() || undefined,
+        tags: []
+      });
+
       Taro.hideLoading();
       Taro.showModal({
         title: '发布成功',
@@ -99,7 +120,11 @@ const PublishPage: React.FC = () => {
           Taro.switchTab({ url: '/pages/home/index' }).catch(() => {});
         }
       });
-    }, 1000);
+    } catch (err) {
+      console.error('[Publish] Error:', err);
+      Taro.hideLoading();
+      Taro.showToast({ title: '发布失败，请重试', icon: 'none' });
+    }
   };
 
   const handleCategoryClick = (key: string) => {

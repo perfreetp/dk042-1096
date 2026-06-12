@@ -153,3 +153,117 @@
   font-size: $font-size-lg;
   font-weight: $font-weight-bold;
 }
+
+.ratingModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+
+  &.hidden {
+    display: none;
+  }
+}
+
+.ratingBox {
+  width: 600rpx;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-xl $spacing-lg $spacing-lg;
+  margin: 0 $spacing-lg;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+}
+
+.ratingTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  text-align: center;
+  margin-bottom: $spacing-lg;
+}
+
+.starsRow {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.star {
+  font-size: 72rpx;
+  color: $color-border;
+  transition: all $transition-fast;
+
+  &.active {
+    color: #FAAD14;
+    text-shadow: 0 2rpx 4rpx rgba(250, 173, 20, 0.3);
+  }
+
+  &:active {
+    transform: scale(1.2);
+  }
+}
+
+.ratingDesc {
+  text-align: center;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.ratingInputWrap {
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.ratingInput {
+  width: 100%;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+  min-height: 160rpx;
+}
+
+.ratingCount {
+  text-align: right;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.ratingActions {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.ratingBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.cancel {
+    background: $color-bg-input;
+    color: $color-text-secondary;
+  }
+
+  &.confirm {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+    color: $color-text-white;
+  }
+}
