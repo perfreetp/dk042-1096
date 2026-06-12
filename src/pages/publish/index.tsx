@@ -26,7 +26,7 @@ const timeOptions = [
   '提前预约'
 ];
 
-const depositPresets = [0, 20, 50, 100, 200];
+const depositPresets = [10, 20, 50, 100, 200];
 
 const PublishPage: React.FC = () => {
   const routerParams = Taro.useRouter().params;
@@ -194,12 +194,16 @@ const PublishPage: React.FC = () => {
 
     const depositClean = (deposit || '').trim();
     if (depositClean === '' || depositClean === '.') {
-      Taro.showToast({ title: '请填写押金（免费请选0）', icon: 'none' });
+      Taro.showToast({ title: '请填写押金（必须大于0）', icon: 'none' });
       return false;
     }
     const depositNum = parseFloat(depositClean);
-    if (isNaN(depositNum) || depositNum < 0) {
-      Taro.showToast({ title: '押金不能为负数', icon: 'none' });
+    if (isNaN(depositNum)) {
+      Taro.showToast({ title: '押金格式不正确', icon: 'none' });
+      return false;
+    }
+    if (depositNum <= 0) {
+      Taro.showToast({ title: '押金必须大于0元', icon: 'none' });
       return false;
     }
     if (depositNum > 9999) {
@@ -472,7 +476,7 @@ const PublishPage: React.FC = () => {
                   type="digit"
                   value={deposit}
                   onInput={handleDepositChange}
-                  placeholder="0 表示免费"
+                  placeholder="1-9999 元，最多 2 位小数"
                   placeholderClass={styles.textInput}
                 />
               </View>
@@ -487,7 +491,7 @@ const PublishPage: React.FC = () => {
                   setDeposit(String(amount));
                 }}
               >
-                <Text>{amount === 0 ? '免押' : `¥${amount}`}</Text>
+                <Text>¥{amount}</Text>
               </View>
             ))}
           </View>

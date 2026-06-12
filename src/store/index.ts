@@ -3,7 +3,7 @@ import { itemsData } from '@/data/items';
 import { borrowRecordsData } from '@/data/borrowRecords';
 import { contactsData, currentUser as currentUserData } from '@/data/user';
 import type { Item, BorrowRecord, Contact, User } from '@/types';
-import { generateId } from '@/utils';
+import { generateId, validateDateTime, formatDate } from '@/utils';
 import Taro from '@tarojs/taro';
 
 const STORAGE_KEY = 'neighbor_share_app_state_v1';
@@ -114,7 +114,15 @@ const useAppStore = create<AppState>((set, get) => ({
 
     const quantitySafe = Math.max(1, Math.min(99, Math.floor(itemData.quantity || 1)));
     const depositNum = Number((itemData as any).deposit ?? 0);
-    const depositSafe = Math.max(0, Math.round((depositNum) * 100) / 100);
+    if (isNaN(depositNum) || depositNum <= 0) {
+      console.error('[Store] addItem rejected: deposit <= 0 or invalid', depositNum);
+      return;
+    }
+    const depositSafe = Math.round(depositNum * 100) / 100;
+    if (depositSafe <= 0) {
+      console.error('[Store] addItem rejected: depositSafe <= 0 after rounding');
+      return;
+    }
     const availQtySafe = Math.max(0, Math.min(quantitySafe, Math.floor((itemData as any).availableQuantity ?? quantitySafe)));
 
     const newItem: Item = {
@@ -167,7 +175,13 @@ const useAppStore = create<AppState>((set, get) => ({
 
     let newDeposit = item.deposit;
     if (typeof updates.deposit === 'number') {
-      newDeposit = Math.max(0, Math.round(updates.deposit * 100) / 100);
+      if (isNaN(updates.deposit) || updates.deposit <= 0) {
+        return { success: false, message: '押金必须大于0元' };
+      }
+      newDeposit = Math.round(updates.deposit * 100) / 100;
+      if (newDeposit <= 0) {
+        return { success: false, message: '押金必须大于0元' };
+      }
     }
 
     let newStatus = item.status;
@@ -286,27 +300,36 @@ const useAppStore = create<AppState>((set, get) => ({
     if (item.status === 'offline') {
       return { success: false, message: '物品已下架，暂时无法预约' };
     }
-    if (!params.pickupTime || !params.pickupTime.trim()) {
-      return { success: false, message: '请选择取件时间' };
-    }
-    if (!params.expectedReturnTime || !params.expectedReturnTime.trim()) {
-      return { success: false, message: '请选择预计归还时间' };
-    }
-    if (params.pickupTime >= params.expectedReturnTime) {
-      return { success: false, message: '归还时间必须晚于取件时间' };
-    }
-
-    const qtySafe = Math.max(1, Math.min(item.availableQuantity, Math.floor(params.quantity || 1)));
-
-    if (item.availableQuantity < qtySafe) {
-      return { success: false, message: `库存不足，仅剩${item.availableQuantity}件可借` };
-    }
-
     if (item.ownerId === state.currentUser.id) {
       return { success: false, message: '不能预约自己发布的物品' };
     }
 
-    const depositSafe = Math.max(0, Math.round(item.deposit * qtySafe * 100) / 100);
+    const rawQty = Number(params.quantity);
+    if (!rawQty || isNaN(rawQty) || rawQty <= 0 || !Number.isFinite(rawQty)) {
+      return { success: false, message: '请填写正确的借用数量' };
+    }
+    const qty = Math.floor(rawQty);
+    if (qty !== rawQty) {
+      return { success: false, message: '借用数量必须为整数' };
+    }
+    if (qty > item.availableQuantity) {
+      return { success: false, message: `库存不足，仅剩${item.availableQuantity}件可借` };
+    }
+
+    const pickupCheck = validateDateTime(params.pickupTime || '', '取件时间');
+    if (!pickupCheck.valid) return { success: false, message: pickupCheck.message! };
+
+    const returnCheck = validateDateTime(params.expectedReturnTime || '', '归还时间');
+    if (!returnCheck.valid) return { success: false, message: returnCheck.message! };
+
+    if (returnCheck.date!.getTime() <= pickupCheck.date!.getTime()) {
+      return { success: false, message: '归还时间必须晚于取件时间' };
+    }
+
+    const normalizedPickup = formatDate(pickupCheck.date!.toISOString());
+    const normalizedReturn = formatDate(returnCheck.date!.toISOString());
+
+    const depositSafe = Math.max(0, Math.round(item.deposit * qty * 100) / 100);
 
     const newRecord: BorrowRecord = {
       id: generateId(),
@@ -321,10 +344,10 @@ const useAppStore = create<AppState>((set, get) => ({
       lenderName: item.ownerName,
       lenderAvatar: item.ownerAvatar,
       lenderBuilding: item.ownerBuilding,
-      quantity: qtySafe,
+      quantity: qty,
       deposit: depositSafe,
-      pickupTime: params.pickupTime,
-      expectedReturnTime: params.expectedReturnTime,
+      pickupTime: normalizedPickup,
+      expectedReturnTime: normalizedReturn,
       status: 'pending_pickup',
       statusText: '待取件',
       extendCount: 0,
@@ -332,7 +355,7 @@ const useAppStore = create<AppState>((set, get) => ({
       createdAt: new Date().toISOString()
     };
 
-    const newAvailQty = Math.max(0, item.availableQuantity - qtySafe);
+    const newAvailQty = Math.max(0, item.availableQuantity - qty);
 
     set((state) => ({
       borrowRecords: [newRecord, ...state.borrowRecords],

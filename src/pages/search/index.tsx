@@ -70,7 +70,7 @@ const SearchPage: React.FC = () => {
     if (type === 'myItems') {
       result = getMyItems();
     } else if (type === 'favorites') {
-      result = getFavoriteItems();
+      result = getFavoriteItems().filter(i => i.status !== 'offline');
     }
 
     if (keyword.trim()) {
@@ -81,6 +81,10 @@ const SearchPage: React.FC = () => {
         i.categoryName.toLowerCase().includes(kw) ||
         i.tags.some(t => t.toLowerCase().includes(kw))
       );
+    }
+
+    if (type !== 'myItems' && activeStatus !== 'offline') {
+      result = result.filter(i => i.status !== 'offline');
     }
 
     if (activeCategory !== 'all') {
@@ -177,7 +181,7 @@ const SearchPage: React.FC = () => {
         <View className={styles.filterSection}>
           <View className={styles.filterTitle}>状态筛选</View>
           <View className={styles.filterTags}>
-            {statusOptions.map(opt => (
+            {statusOptions.filter(opt => type === 'myItems' || opt.key !== 'offline').map(opt => (
               <View
                 key={opt.key}
                 className={classnames(styles.filterTag, activeStatus === opt.key && styles.active)}

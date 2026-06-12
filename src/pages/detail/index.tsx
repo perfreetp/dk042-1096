@@ -6,6 +6,7 @@ import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
 import { statusMap, formatDeposit } from '@/types';
 import useAppStore from '@/store';
+import { validateDateTime } from '@/utils';
 
 const mockBorrowHistory = [
   { id: 'h1', avatar: 'https://picsum.photos/id/1002/100/100', name: '王先生', date: '2026-06-01 至 2026-06-03' },
@@ -88,17 +89,26 @@ const DetailPage: React.FC = () => {
   const statusInfo = statusMap[item.status];
   const isAvailable = item.status === 'available' && item.availableQuantity > 0;
 
-  const qtyNum = Math.max(1, Math.min(item.availableQuantity, parseInt(reserveQuantity || '1', 10) || 1));
+  const qtyNum = Math.max(1, parseInt(reserveQuantity || '1', 10) || 1);
   const totalDeposit = Math.round(item.deposit * qtyNum * 100) / 100;
   const remainingQty = Math.max(0, item.availableQuantity - qtyNum);
 
   const validateReserve = (): { ok: boolean; msg?: string } => {
     const q = parseInt(reserveQuantity, 10);
+    if (!reserveQuantity || !reserveQuantity.trim()) return { ok: false, msg: '请填写借用数量' };
     if (!q || q <= 0 || isNaN(q)) return { ok: false, msg: '请填写正确的借用数量' };
     if (q > item.availableQuantity) return { ok: false, msg: `库存不足，仅剩${item.availableQuantity}件` };
-    if (!reservePickupTime || !reservePickupTime.trim()) return { ok: false, msg: '请选择取件时间' };
-    if (!reserveReturnTime || !reserveReturnTime.trim()) return { ok: false, msg: '请选择预计归还时间' };
-    if (reservePickupTime >= reserveReturnTime) return { ok: false, msg: '归还时间必须晚于取件时间' };
+
+    const pickupCheck = validateDateTime(reservePickupTime, '取件时间');
+    if (!pickupCheck.valid) return { ok: false, msg: pickupCheck.message };
+
+    const returnCheck = validateDateTime(reserveReturnTime, '归还时间');
+    if (!returnCheck.valid) return { ok: false, msg: returnCheck.message };
+
+    if (returnCheck.date!.getTime() <= pickupCheck.date!.getTime()) {
+      return { ok: false, msg: '归还时间必须晚于取件时间' };
+    }
+
     if (item.status === 'maintenance') return { ok: false, msg: '物品正在维护中' };
     if (item.status === 'offline') return { ok: false, msg: '物品已下架' };
     if (isOwner) return { ok: false, msg: '不能预约自己发布的物品' };
@@ -143,10 +153,11 @@ const DetailPage: React.FC = () => {
       Taro.showToast({ title: v.msg || '预约信息不完整', icon: 'none' });
       return;
     }
+    const rawQty = parseInt(reserveQuantity, 10);
     Taro.showLoading({ title: '预约中...' });
     const result = createBorrowRecord({
       itemId: item.id,
-      quantity: qtyNum,
+      quantity: rawQty,
       pickupTime: reservePickupTime.trim(),
       expectedReturnTime: reserveReturnTime.trim()
     });
@@ -173,13 +184,8 @@ const DetailPage: React.FC = () => {
     const v = (e.detail.value || '').replace(/[^\d]/g, '');
     if (!v) { setReserveQuantity(''); return; }
     const num = parseInt(v, 10);
-    if (num > item.availableQuantity) {
-      setReserveQuantity(String(item.availableQuantity));
-      Taro.showToast({ title: `最多可借${item.availableQuantity}件`, icon: 'none' });
-      return;
-    }
-    if (num < 1) {
-      setReserveQuantity('1');
+    if (num > 99) {
+      setReserveQuantity('99');
       return;
     }
     setReserveQuantity(v);

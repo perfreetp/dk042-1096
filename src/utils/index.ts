@@ -42,3 +42,36 @@ export function formatDeposit(amount: number): string {
   }
   return `¥${num.toFixed(2)}`;
 }
+
+export interface DateTimeValidationResult {
+  valid: boolean;
+  message?: string;
+  date?: Date;
+}
+
+const DATETIME_REGEX = /^\d{4}[-/]\d{1,2}[-/]\d{1,2}[ T]\d{1,2}:\d{1,2}(:\d{1,2})?$/;
+
+export function validateDateTime(value: string, fieldLabel: string = '时间'): DateTimeValidationResult {
+  if (!value || !value.trim()) {
+    return { valid: false, message: `请填写${fieldLabel}` };
+  }
+  const trimmed = value.trim();
+  if (!DATETIME_REGEX.test(trimmed)) {
+    return { valid: false, message: `${fieldLabel}格式不正确，应为：YYYY-MM-DD HH:MM` };
+  }
+  const normalized = trimmed.replace(/\//g, '-').replace('T', ' ');
+  const d = new Date(normalized);
+  if (isNaN(d.getTime())) {
+    return { valid: false, message: `${fieldLabel}不是合法的日期时间` };
+  }
+  const [datePart] = normalized.split(' ');
+  const [year, month, day] = datePart.split('-').map(Number);
+  if (
+    d.getFullYear() !== year ||
+    d.getMonth() + 1 !== month ||
+    d.getDate() !== day
+  ) {
+    return { valid: false, message: `${fieldLabel}不是合法的日期（如 2 月 30 日无效）` };
+  }
+  return { valid: true, date: d };
+}
