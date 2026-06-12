@@ -1,0 +1,203 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.role {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.itemInfo {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.itemImage {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-md;
+  background: $color-bg-hover;
+  flex-shrink: 0;
+}
+
+.itemDetail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.itemTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  line-height: 1.4;
+  @include text-ellipsis-multi(2);
+}
+
+.itemMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.userRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.userAvatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.userDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  @include text-ellipsis;
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.btn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-sm;
+  padding: 0 $spacing-md;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnSecondary {
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+}
+
+.btnWarning {
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+  color: $color-text-white;
+}
+
+.btnDanger {
+  background: #FFECE8;
+  color: $color-error;
+}
+
+.timeRow {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-top: $spacing-sm;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.timeItem {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.timeLabel {
+  flex-shrink: 0;
+  color: $color-text-tertiary;
+}
+
+.timeValue {
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  margin-top: $spacing-sm;
+  padding-top: $spacing-sm;
+  border-top: 1rpx dashed $color-divider;
+}
+
+.stars {
+  color: $color-warning;
+  font-size: $font-size-sm;
+}
+
+.ratingText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-left: $spacing-sm;
+  @include text-ellipsis;
+  flex: 1;
+}
+
+.depositBadge {
+  font-size: $font-size-xs;
+  color: $color-deposit;
+  background: $color-deposit-bg;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+  font-weight: $font-weight-medium;
+}

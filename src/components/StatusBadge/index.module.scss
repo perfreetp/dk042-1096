@@ -1,0 +1,83 @@
+@use '@/styles/variables.scss' as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.available {
+  background-color: $color-primary-bg;
+  color: $color-primary-dark;
+}
+
+.reserved {
+  background-color: $color-secondary-bg;
+  color: $color-secondary;
+}
+
+.lent {
+  background-color: #FFECE8;
+  color: $color-error;
+}
+
+.maintenance {
+  background-color: #F2F3F5;
+  color: $color-text-tertiary;
+}
+
+.pendingPickup {
+  background-color: $color-secondary-bg;
+  color: $color-warning;
+}
+
+.borrowing {
+  background-color: $color-deposit-bg;
+  color: $color-deposit;
+}
+
+.returned {
+  background-color: $color-primary-bg;
+  color: $color-primary-dark;
+}
+
+.overdue {
+  background-color: #FFECE8;
+  color: $color-error;
+}
+
+.cancelled {
+  background-color: #F2F3F5;
+  color: $color-text-tertiary;
+}
+
+.tag {
+  background-color: $color-tag-bg;
+  color: $color-tag-text;
+  padding: 6rpx 18rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+}
+
+.topTag {
+  background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+  color: $color-text-white;
+  padding: 6rpx 18rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.depositTag {
+  background-color: $color-deposit-bg;
+  color: $color-deposit;
+  padding: 6rpx 18rpx;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+}

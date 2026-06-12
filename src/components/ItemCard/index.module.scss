@@ -1,0 +1,160 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    box-shadow: $shadow-card-hover;
+    transform: translateY(-2rpx);
+  }
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  height: 320rpx;
+  background: $color-bg-hover;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+}
+
+.topBadge {
+  position: absolute;
+  top: $spacing-md;
+  left: $spacing-md;
+  z-index: 2;
+}
+
+.statusBadge {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-md;
+  z-index: 2;
+}
+
+.favoriteBtn {
+  position: absolute;
+  bottom: $spacing-md;
+  right: $spacing-md;
+  width: 56rpx;
+  height: 56rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  z-index: 2;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.92);
+  }
+}
+
+.favorited {
+  color: #FF4D4F;
+}
+
+.notFavorited {
+  color: $color-text-tertiary;
+}
+
+.content {
+  padding: $spacing-md $spacing-md $spacing-lg;
+}
+
+.title {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  line-height: 1.4;
+  margin-bottom: $spacing-sm;
+  @include text-ellipsis;
+}
+
+.desc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  margin-bottom: $spacing-md;
+  @include text-ellipsis-multi(2);
+  height: 78rpx;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.category {
+  font-size: $font-size-xs;
+  color: $color-primary-dark;
+  background: $color-primary-bg;
+  padding: 4rpx 14rpx;
+  border-radius: $radius-xs;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.owner {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+  min-width: 0;
+}
+
+.avatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+}
+
+.ownerName {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  @include text-ellipsis;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex-shrink: 0;
+}
+
+.stat {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.deposit {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-deposit;
+}

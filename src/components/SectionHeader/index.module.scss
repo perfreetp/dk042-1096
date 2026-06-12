@@ -1,0 +1,52 @@
+@use '@/styles/variables.scss' as *;
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg 0 $spacing-md;
+}
+
+.titleWrap {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.accent {
+  width: 8rpx;
+  height: 32rpx;
+  background: linear-gradient(180deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xs;
+}
+
+.subtitle {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-left: $spacing-sm;
+}
+
+.moreBtn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.moreIcon {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

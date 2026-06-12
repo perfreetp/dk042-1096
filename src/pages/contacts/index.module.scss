@@ -1,0 +1,306 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.searchBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+}
+
+.searchWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-input;
+  border-radius: $radius-button;
+}
+
+.searchIcon {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  min-width: 0;
+}
+
+.addBtn {
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-md;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.statsBar {
+  display: flex;
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+  border-top: 1rpx solid $color-divider;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-sm;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.statValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.listContainer {
+  padding: 0 $page-padding $spacing-xl;
+}
+
+.contactCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.avatarWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: $radius-round;
+  border: 4rpx solid $color-bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.onlineDot {
+  position: absolute;
+  bottom: 4rpx;
+  right: 4rpx;
+  width: 24rpx;
+  height: 24rpx;
+  background: $color-success;
+  border: 4rpx solid $color-bg-card;
+  border-radius: $radius-round;
+}
+
+.contactInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.infoTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+  min-width: 0;
+}
+
+.contactName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.badge {
+  padding: 2rpx $spacing-sm;
+  border-radius: $radius-xs;
+  font-size: $font-size-xs;
+  flex-shrink: 0;
+
+  &.neighbor {
+    background: $color-primary-bg;
+    color: $color-primary-dark;
+  }
+
+  &.friend {
+    background: $color-secondary-bg;
+    color: $color-secondary;
+  }
+}
+
+.timeText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.infoMiddle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.buildingInfo {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  flex-shrink: 0;
+}
+
+.roomInfo {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.infoBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lastMsg {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  flex: 1;
+  min-width: 0;
+  @include text-ellipsis;
+}
+
+.unreadBadge {
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 $spacing-xs;
+  background: $color-error;
+  color: $color-text-white;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  line-height: 36rpx;
+  text-align: center;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+
+  &.dot {
+    min-width: 16rpx;
+    height: 16rpx;
+    padding: 0;
+    line-height: 16rpx;
+  }
+}
+
+.moreBtn {
+  padding: $spacing-sm;
+  font-size: 32rpx;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+  margin-left: $spacing-xs;
+
+  &:active {
+    opacity: 0.6;
+  }
+}
+
+.sectionTitle {
+  padding: $spacing-md $page-padding $spacing-sm;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.sectionCount {
+  background: $color-bg-hover;
+  padding: 2rpx $spacing-sm;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+}
+
+.addTip {
+  margin: $spacing-xl $page-padding;
+  padding: $spacing-lg;
+  background: $color-primary-bg;
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  border: 2rpx dashed rgba($color-primary, 0.3);
+
+  &:active {
+    background: rgba($color-primary, 0.15);
+  }
+}
+
+.addTipIcon {
+  width: 80rpx;
+  height: 80rpx;
+  background: $color-bg-card;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.addTipText {
+  flex: 1;
+}
+
+.addTipTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary-dark;
+  margin-bottom: $spacing-xs;
+}
+
+.addTipDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}

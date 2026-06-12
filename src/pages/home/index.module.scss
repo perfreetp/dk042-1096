@@ -1,0 +1,251 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+}
+
+.header {
+  position: relative;
+  padding: $spacing-lg $page-padding $spacing-xl;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-bottom-left-radius: $radius-xl;
+  border-bottom-right-radius: $radius-xl;
+}
+
+.greeting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.greetingText {
+  color: $color-text-white;
+}
+
+.greetingTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
+}
+
+.greetingSub {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.locationBadge {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: $spacing-xs $spacing-md;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.searchIcon {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  min-width: 0;
+}
+
+.searchBtn {
+  @include button-reset;
+  padding: $spacing-xs $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.content {
+  padding: 0 $page-padding;
+  margin-top: -$spacing-lg;
+}
+
+.categorySection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-lg $spacing-sm;
+}
+
+.categoryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.categoryIcon {
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-primary-bg;
+  border-radius: $radius-lg;
+  font-size: 48rpx;
+}
+
+.categoryName {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  text-align: center;
+}
+
+.section {
+  margin-bottom: $spacing-md;
+}
+
+.scrollContainer {
+  @include scroll-x-container;
+  padding-bottom: $spacing-sm;
+  margin: 0 -$page-padding;
+  padding-left: $page-padding;
+}
+
+.rulesSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.rulesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+}
+
+.ruleItem {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, #FAFFFD 0%, #F0FFF4 100%);
+  border-radius: $radius-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.ruleIcon {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.ruleContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.ruleTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.ruleDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  line-height: 1.4;
+}
+
+.itemsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+}
+
+.topTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.topTagItem {
+  padding: $spacing-xs $spacing-md;
+  background: $color-secondary-bg;
+  color: $color-secondary;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &.active {
+    background: linear-gradient(135deg, $color-secondary 0%, $color-secondary-light 100%);
+    color: $color-text-white;
+  }
+}
+
+.statsBar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: $radius-lg;
+  margin-top: $spacing-md;
+}
+
+.statItem {
+  flex: 1;
+  text-align: center;
+  color: $color-text-white;
+
+  &:not(:last-child) {
+    border-right: 1rpx solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+.statValue {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  margin-bottom: 2rpx;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  opacity: 0.85;
+}

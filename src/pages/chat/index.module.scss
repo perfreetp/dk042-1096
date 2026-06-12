@@ -1,0 +1,391 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.headerBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.backBtn {
+  padding: $spacing-xs;
+  font-size: 40rpx;
+  color: $color-text-primary;
+  flex-shrink: 0;
+
+  &:active {
+    opacity: 0.6;
+  }
+}
+
+.headerAvatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.headerName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.onlineStatus {
+  width: 12rpx;
+  height: 12rpx;
+  background: $color-success;
+  border-radius: $radius-round;
+}
+
+.headerSub {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.headerMore {
+  padding: $spacing-xs;
+  font-size: 36rpx;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+
+  &:active {
+    opacity: 0.6;
+  }
+}
+
+.chatArea {
+  flex: 1;
+  padding: $spacing-md $page-padding $spacing-lg;
+  overflow-y: auto;
+}
+
+.timeDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: $spacing-lg 0;
+  gap: $spacing-sm;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1rpx;
+  background: $color-divider;
+  max-width: 120rpx;
+}
+
+.dividerText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.systemMsg {
+  display: flex;
+  justify-content: center;
+  margin: $spacing-md 0;
+}
+
+.systemBubble {
+  max-width: 520rpx;
+  padding: $spacing-xs $spacing-md;
+  background: rgba($color-primary, 0.1);
+  color: $color-primary-dark;
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
+  line-height: $line-height-normal;
+  text-align: center;
+}
+
+.msgRow {
+  display: flex;
+  margin-bottom: $spacing-lg;
+  gap: $spacing-sm;
+
+  &.me {
+    flex-direction: row-reverse;
+  }
+}
+
+.msgAvatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.msgContent {
+  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+
+  .me & {
+    align-items: flex-end;
+  }
+}
+
+.msgTime {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  padding: 0 $spacing-sm;
+}
+
+.bubble {
+  position: relative;
+  padding: $spacing-md $spacing-lg;
+  border-radius: $radius-lg;
+  font-size: $font-size-md;
+  line-height: $line-height-loose;
+  word-break: break-word;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  transition: all $transition-base;
+
+  &.textOther {
+    background: $color-bg-card;
+    color: $color-text-primary;
+    border-top-left-radius: 4rpx;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -12rpx;
+      width: 16rpx;
+      height: 16rpx;
+      background: $color-bg-card;
+      border-top-left-radius: 16rpx;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -12rpx;
+      width: 16rpx;
+      height: 16rpx;
+      background: $color-bg-page;
+      border-top-right-radius: 16rpx;
+    }
+  }
+
+  &.textMe {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+    color: $color-text-white;
+    border-top-right-radius: 4rpx;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12rpx;
+      width: 16rpx;
+      height: 16rpx;
+      background: $color-primary-dark;
+      border-top-right-radius: 16rpx;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -12rpx;
+      width: 16rpx;
+      height: 16rpx;
+      background: $color-bg-page;
+      border-top-left-radius: 16rpx;
+    }
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.msgStatus {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  padding: 0 $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.quickReplies {
+  padding: $spacing-sm $page-padding;
+  background: $color-bg-card;
+  border-top: 1rpx solid $color-divider;
+  display: flex;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  white-space: nowrap;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.quickReplyItem {
+  display: inline-flex;
+  padding: $spacing-sm $spacing-md;
+  background: $color-primary-bg;
+  color: $color-primary-dark;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  flex-shrink: 0;
+  transition: all $transition-base;
+
+  &:active {
+    background: rgba($color-primary, 0.2);
+    transform: scale(0.96);
+  }
+}
+
+.inputBar {
+  padding: $spacing-md $page-padding;
+  background: $color-bg-card;
+  border-top: 1rpx solid $color-divider;
+  display: flex;
+  align-items: flex-end;
+  gap: $spacing-sm;
+}
+
+.toolBtn {
+  width: 72rpx;
+  height: 72rpx;
+  background: $color-bg-input;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  flex-shrink: 0;
+  transition: all $transition-base;
+
+  &:active {
+    background: $color-bg-hover;
+    transform: scale(0.96);
+  }
+}
+
+.inputWrap {
+  flex: 1;
+  min-width: 0;
+  background: $color-bg-input;
+  border-radius: 36rpx;
+  padding: $spacing-sm $spacing-lg;
+  display: flex;
+  align-items: center;
+  min-height: 72rpx;
+}
+
+.inputField {
+  flex: 1;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  min-width: 0;
+  max-height: 200rpx;
+}
+
+.sendBtn {
+  @include button-reset;
+  min-width: 120rpx;
+  height: 72rpx;
+  padding: 0 $spacing-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  &.disabled {
+    background: $color-bg-hover;
+    color: $color-text-disabled;
+  }
+}
+
+.goodsCard {
+  margin: $spacing-md $page-padding;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  border: 2rpx solid $color-primary-bg;
+}
+
+.goodsImg {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.goodsInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.goodsLabel {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-xs;
+}
+
+.goodsTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  @include text-ellipsis;
+}
+
+.goodsMeta {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.goodsDeposit {
+  color: $color-deposit;
+  font-weight: $font-weight-medium;
+}

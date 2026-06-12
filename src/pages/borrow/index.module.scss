@@ -1,0 +1,155 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-md 0;
+}
+
+.tabs {
+  display: flex;
+  padding: 0 $page-padding;
+  margin-bottom: $spacing-md;
+  background: $color-bg-card;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md $spacing-sm;
+  gap: 4rpx;
+  transition: all $transition-base;
+
+  &.active {
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 48rpx;
+      height: 6rpx;
+      background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+      border-radius: $radius-xs;
+    }
+  }
+}
+
+.tabText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  .active & {
+    color: $color-primary;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.tabCount {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.active .tabCount {
+  color: $color-primary-light;
+}
+
+.statusTabs {
+  display: flex;
+  gap: $spacing-sm;
+  padding: 0 $page-padding $spacing-md;
+  overflow-x: auto;
+  @include scroll-x-container;
+}
+
+.statusTab {
+  @include scroll-x-item(auto);
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+  transition: all $transition-base;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.content {
+  padding: 0 $page-padding;
+}
+
+.summaryCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  color: $color-text-white;
+  box-shadow: $shadow-card;
+}
+
+.summaryTitle {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+  margin-bottom: $spacing-md;
+}
+
+.summaryStats {
+  display: flex;
+  align-items: center;
+}
+
+.summaryItem {
+  flex: 1;
+  text-align: center;
+
+  &:not(:last-child) {
+    border-right: 1rpx solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+.summaryValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
+}
+
+.summaryLabel {
+  font-size: $font-size-xs;
+  opacity: 0.85;
+}
+
+.depositRow {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.depositLabel {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.depositValue {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}

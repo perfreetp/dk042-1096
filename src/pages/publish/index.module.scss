@@ -1,0 +1,319 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-md $page-padding $spacing-xl * 3;
+}
+
+.formCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.titleIcon {
+  width: 8rpx;
+  height: 28rpx;
+  background: linear-gradient(180deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xs;
+}
+
+.uploadGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+}
+
+.uploadItem {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: $radius-md;
+  overflow: hidden;
+}
+
+.uploadedImage {
+  width: 100%;
+  height: 100%;
+}
+
+.deleteBtn {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-white;
+  font-size: 24rpx;
+  z-index: 2;
+}
+
+.uploadBtn {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 2rpx dashed $color-border;
+  border-radius: $radius-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  background: $color-bg-hover;
+  transition: all $transition-base;
+
+  &:active {
+    background: $color-primary-bg;
+    border-color: $color-primary;
+  }
+}
+
+.uploadIcon {
+  font-size: 56rpx;
+  color: $color-text-tertiary;
+}
+
+.uploadText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.uploadTip {
+  margin-top: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background: $color-secondary-bg;
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
+  color: $color-secondary;
+  line-height: 1.5;
+}
+
+.formGroup {
+  margin-bottom: $spacing-lg;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.required {
+  color: $color-error;
+}
+
+.inputWrap {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &:focus-within {
+    border-color: $color-primary;
+    background: $color-bg-card;
+  }
+}
+
+.textInput {
+  flex: 1;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  min-width: 0;
+}
+
+.inputIcon {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.textareaWrap {
+  padding: $spacing-md $spacing-lg;
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &:focus-within {
+    border-color: $color-primary;
+    background: $color-bg-card;
+  }
+}
+
+.textarea {
+  width: 100%;
+  min-height: 200rpx;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: 1.6;
+}
+
+.charCount {
+  text-align: right;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-sm;
+}
+
+.categoryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  padding: $spacing-md $spacing-sm;
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-primary-bg;
+    border-color: $color-primary;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.categoryIcon {
+  font-size: 40rpx;
+}
+
+.categoryText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.active .categoryText {
+  color: $color-primary-dark;
+  font-weight: $font-weight-medium;
+}
+
+.rowInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+  z-index: 100;
+}
+
+.btn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnSecondary {
+  background: $color-bg-hover;
+  color: $color-text-secondary;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+}
+
+.timeTagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.timeTag {
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-input;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-primary-bg;
+    color: $color-primary-dark;
+    border-color: $color-primary;
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.depositRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.depositPreset {
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-deposit-bg;
+    color: $color-deposit;
+    border-color: $color-deposit;
+  }
+}

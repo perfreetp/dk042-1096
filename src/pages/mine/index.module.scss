@@ -1,0 +1,292 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+}
+
+.header {
+  position: relative;
+  padding: $spacing-xl $page-padding $spacing-xl * 2;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+}
+
+.avatar {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: $radius-round;
+  border: 4rpx solid rgba(255, 255, 255, 0.4);
+  background: $color-bg-card;
+  flex-shrink: 0;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+  color: $color-text-white;
+}
+
+.userName {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
+  @include text-ellipsis;
+}
+
+.userLocation {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+  margin-bottom: $spacing-sm;
+}
+
+.creditBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: $spacing-xs $spacing-md;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.statsCard {
+  display: flex;
+  margin: -$spacing-lg $page-padding 0;
+  padding: $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-float;
+}
+
+.statItem {
+  flex: 1;
+  text-align: center;
+
+  &:not(:last-child) {
+    border-right: 1rpx solid $color-divider;
+  }
+}
+
+.statValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.section {
+  padding: $spacing-md $page-padding;
+}
+
+.sectionTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+  padding-left: $spacing-sm;
+}
+
+.menuCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  transition: all $transition-base;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+  }
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.menuIcon {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-primary-bg;
+  border-radius: $radius-md;
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
+
+.menuIconBlue {
+  background: $color-deposit-bg;
+}
+
+.menuIconOrange {
+  background: $color-secondary-bg;
+}
+
+.menuIconRed {
+  background: #FFECE8;
+}
+
+.menuContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.menuTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.menuDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  @include text-ellipsis;
+}
+
+.menuArrow {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.menuBadge {
+  padding: 4rpx 16rpx;
+  background: $color-error;
+  color: $color-text-white;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+}
+
+.menuValue {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+}
+
+.creditDetailRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+  margin-top: $spacing-sm;
+  border-top: 1rpx dashed $color-divider;
+}
+
+.creditLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.creditValue {
+  font-size: $font-size-xs;
+  color: $color-primary-dark;
+  font-weight: $font-weight-medium;
+}
+
+.gridMenu {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.gridItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-xs;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.gridIcon {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-primary-bg;
+  border-radius: $radius-md;
+  font-size: 40rpx;
+}
+
+.gridText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  text-align: center;
+}
+
+.depositCard {
+  background: linear-gradient(135deg, #1677FF 0%, #69B1FF 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  color: $color-text-white;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.depositHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.depositTitle {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.depositAmount {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-md;
+}
+
+.depositActions {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.depositBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-sm;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}

@@ -1,0 +1,343 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding-bottom: 160rpx;
+}
+
+.imageSwiper {
+  width: 100%;
+  height: 600rpx;
+  background: $color-bg-hover;
+}
+
+.swiperImage {
+  width: 100%;
+  height: 100%;
+}
+
+.imageIndicator {
+  position: absolute;
+  bottom: $spacing-md;
+  right: $spacing-md;
+  padding: $spacing-xs $spacing-md;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  z-index: 2;
+}
+
+.content {
+  padding: 0 $page-padding;
+}
+
+.infoCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-top: -$spacing-lg;
+  position: relative;
+  box-shadow: $shadow-float;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+}
+
+.tagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, #F0F9EB 0%, #FAFFFD 100%);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+}
+
+.priceItem {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  flex: 1;
+  text-align: center;
+
+  &:not(:last-child) {
+    border-right: 1rpx solid $color-primary-bg;
+  }
+}
+
+.priceLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.priceValue {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-primary-dark;
+}
+
+.priceBlue {
+  color: $color-deposit;
+}
+
+.detailSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-top: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.sectionAccent {
+  width: 8rpx;
+  height: 28rpx;
+  background: linear-gradient(180deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xs;
+}
+
+.description {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: 1.8;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.infoItem {
+  display: flex;
+  gap: $spacing-md;
+  align-items: flex-start;
+}
+
+.infoIcon {
+  font-size: $font-size-lg;
+  width: 48rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.infoContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.infoLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+}
+
+.infoValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  line-height: 1.5;
+}
+
+.ownerCard {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, #F0F9EB 0%, #FAFFFD 100%);
+  border-radius: $radius-md;
+}
+
+.ownerAvatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+}
+
+.ownerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.ownerName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.ownerDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.ownerActions {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.iconBtn {
+  @include button-reset;
+  width: 64rpx;
+  height: 64rpx;
+  background: $color-bg-card;
+  border-radius: $radius-round;
+  font-size: 28rpx;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.92);
+  }
+}
+
+.recordsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.recordItem {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+}
+
+.recordAvatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+}
+
+.recordContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.recordTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.recordDate {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background: $color-bg-card;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+  align-items: center;
+  z-index: 100;
+}
+
+.bottomBtnGroup {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.bottomIconBtn {
+  @include button-reset;
+  flex-direction: column;
+  gap: 2rpx;
+  padding: $spacing-xs $spacing-md;
+  background: transparent;
+}
+
+.bottomIcon {
+  font-size: $font-size-xl;
+}
+
+.bottomIconText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.favorited {
+  color: #FF4D4F;
+}
+
+.favoritedText {
+  color: #FF4D4F;
+}
+
+.actionBtns {
+  flex: 1;
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.btn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnSecondary {
+  background: $color-primary-bg;
+  color: $color-primary-dark;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+}
+
+.btnDisabled {
+  background: $color-bg-hover;
+  color: $color-text-tertiary;
+  opacity: 0.8;
+}
