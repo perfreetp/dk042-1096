@@ -28,6 +28,9 @@ interface AppState {
   _persist: () => void;
 
   addItem: (item: Omit<Item, 'id' | 'ownerId' | 'ownerName' | 'ownerAvatar' | 'ownerBuilding' | 'status' | 'borrowCount' | 'createdAt'> & { images: string[] }) => void;
+  updateItem: (itemId: string, updates: Partial<Omit<Item, 'id' | 'ownerId' | 'borrowCount' | 'createdAt'>>) => { success: boolean; message: string };
+  offlineItem: (itemId: string) => { success: boolean; message: string };
+  onlineItem: (itemId: string) => { success: boolean; message: string };
   toggleFavorite: (itemId: string) => void;
   isFavorite: (itemId: string) => boolean;
   getFavoriteItems: () => Item[];
@@ -110,7 +113,8 @@ const useAppStore = create<AppState>((set, get) => ({
     const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     const quantitySafe = Math.max(1, Math.min(99, Math.floor(itemData.quantity || 1)));
-    const depositSafe = Math.max(0, Math.floor((itemData as any).deposit || 0));
+    const depositNum = Number((itemData as any).deposit ?? 0);
+    const depositSafe = Math.max(0, Math.round((depositNum) * 100) / 100);
     const availQtySafe = Math.max(0, Math.min(quantitySafe, Math.floor((itemData as any).availableQuantity ?? quantitySafe)));
 
     const newItem: Item = {
@@ -135,6 +139,99 @@ const useAppStore = create<AppState>((set, get) => ({
     }));
     get()._persist();
     console.log('[Store] Item added with id:', newItem.id);
+  },
+
+  updateItem: (itemId, updates) => {
+    console.log('[Store] Update item:', itemId, updates);
+    const state = get();
+    const item = state.items.find((i) => i.id === itemId);
+    if (!item) return { success: false, message: '物品不存在' };
+    if (item.ownerId !== state.currentUser.id) {
+      return { success: false, message: '只能编辑自己的物品' };
+    }
+
+    const lentCount = Math.max(0, item.quantity - item.availableQuantity);
+    let newQuantity = item.quantity;
+    let newAvailQty = item.availableQuantity;
+    if (typeof updates.quantity === 'number') {
+      if (updates.quantity < lentCount) {
+        return { success: false, message: `已有${lentCount}件借出，总数量不能少于${lentCount}件` };
+      }
+      newQuantity = Math.max(1, Math.min(99, Math.floor(updates.quantity)));
+      newAvailQty = Math.max(0, Math.min(newQuantity - lentCount, newQuantity));
+    }
+    if (typeof updates.availableQuantity === 'number') {
+      const maxAvail = newQuantity - lentCount;
+      newAvailQty = Math.max(0, Math.min(maxAvail, Math.floor(updates.availableQuantity)));
+    }
+
+    let newDeposit = item.deposit;
+    if (typeof updates.deposit === 'number') {
+      newDeposit = Math.max(0, Math.round(updates.deposit * 100) / 100);
+    }
+
+    let newStatus = item.status;
+    if (updates.status) {
+      newStatus = updates.status;
+    } else if (item.status !== 'offline' && item.status !== 'maintenance') {
+      newStatus = newAvailQty > 0 ? 'available' : 'reserved';
+    }
+
+    set((state) => ({
+      items: state.items.map((i) =>
+        i.id === itemId
+          ? {
+              ...i,
+              ...updates,
+              quantity: newQuantity,
+              availableQuantity: newAvailQty,
+              deposit: newDeposit,
+              status: newStatus
+            }
+          : i
+      )
+    }));
+    get()._persist();
+    return { success: true, message: '修改成功' };
+  },
+
+  offlineItem: (itemId) => {
+    console.log('[Store] Offline item:', itemId);
+    const state = get();
+    const item = state.items.find((i) => i.id === itemId);
+    if (!item) return { success: false, message: '物品不存在' };
+    if (item.ownerId !== state.currentUser.id) {
+      return { success: false, message: '只能操作自己的物品' };
+    }
+    const lentCount = item.quantity - item.availableQuantity;
+    if (lentCount > 0) {
+      return { success: false, message: `还有${lentCount}件物品未归还，暂时无法下架` };
+    }
+    set((state) => ({
+      items: state.items.map((i) =>
+        i.id === itemId ? { ...i, status: 'offline' } : i
+      )
+    }));
+    get()._persist();
+    return { success: true, message: '已下架' };
+  },
+
+  onlineItem: (itemId) => {
+    console.log('[Store] Online item:', itemId);
+    const state = get();
+    const item = state.items.find((i) => i.id === itemId);
+    if (!item) return { success: false, message: '物品不存在' };
+    if (item.ownerId !== state.currentUser.id) {
+      return { success: false, message: '只能操作自己的物品' };
+    }
+    const newStatus = item.availableQuantity > 0 ? 'available' : 'reserved';
+    set((state) => ({
+      items: state.items.map((i) =>
+        i.id === itemId ? { ...i, status: newStatus } : i
+      )
+    }));
+    get()._persist();
+    return { success: true, message: '已重新上架' };
   },
 
   toggleFavorite: (itemId) => {
@@ -186,18 +283,30 @@ const useAppStore = create<AppState>((set, get) => ({
     if (item.status === 'maintenance') {
       return { success: false, message: '物品正在维护中，暂时无法预约' };
     }
+    if (item.status === 'offline') {
+      return { success: false, message: '物品已下架，暂时无法预约' };
+    }
+    if (!params.pickupTime || !params.pickupTime.trim()) {
+      return { success: false, message: '请选择取件时间' };
+    }
+    if (!params.expectedReturnTime || !params.expectedReturnTime.trim()) {
+      return { success: false, message: '请选择预计归还时间' };
+    }
+    if (params.pickupTime >= params.expectedReturnTime) {
+      return { success: false, message: '归还时间必须晚于取件时间' };
+    }
 
     const qtySafe = Math.max(1, Math.min(item.availableQuantity, Math.floor(params.quantity || 1)));
 
     if (item.availableQuantity < qtySafe) {
-      return { success: false, message: '可借数量不足' };
+      return { success: false, message: `库存不足，仅剩${item.availableQuantity}件可借` };
     }
 
     if (item.ownerId === state.currentUser.id) {
       return { success: false, message: '不能预约自己发布的物品' };
     }
 
-    const depositSafe = Math.max(0, item.deposit) * qtySafe;
+    const depositSafe = Math.max(0, Math.round(item.deposit * qtySafe * 100) / 100);
 
     const newRecord: BorrowRecord = {
       id: generateId(),
@@ -207,8 +316,11 @@ const useAppStore = create<AppState>((set, get) => ({
       borrowerId: state.currentUser.id,
       borrowerName: state.currentUser.name,
       borrowerAvatar: state.currentUser.avatar,
+      borrowerBuilding: state.currentUser.building,
       lenderId: item.ownerId,
       lenderName: item.ownerName,
+      lenderAvatar: item.ownerAvatar,
+      lenderBuilding: item.ownerBuilding,
       quantity: qtySafe,
       deposit: depositSafe,
       pickupTime: params.pickupTime,
@@ -233,7 +345,7 @@ const useAppStore = create<AppState>((set, get) => ({
             }
           : i
       ),
-      frozenDeposits: state.frozenDeposits + depositSafe
+      frozenDeposits: Math.round((state.frozenDeposits + depositSafe) * 100) / 100
     }));
     get()._persist();
 

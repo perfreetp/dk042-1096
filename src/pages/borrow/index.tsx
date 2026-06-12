@@ -150,15 +150,19 @@ const BorrowPage: React.FC = () => {
     const isBorrower = activeTab === 'borrow';
     const targetId = isBorrower ? record.lenderId : record.borrowerId;
     const targetName = isBorrower ? record.lenderName : record.borrowerName;
-    const targetAvatar = isBorrower ? '' : record.borrowerAvatar;
-    const targetBuilding = '';
     const item = items.find(i => i.id === record.itemId);
-    let finalAvatar = targetAvatar;
-    let finalBuilding = targetBuilding;
-    if (isBorrower && item) {
-      finalAvatar = item.ownerAvatar;
-      finalBuilding = item.ownerBuilding;
+
+    let finalAvatar = '';
+    let finalBuilding = '';
+
+    if (isBorrower) {
+      finalAvatar = record.lenderAvatar || (item ? item.ownerAvatar : '') || '';
+      finalBuilding = record.lenderBuilding || (item ? item.ownerBuilding : '') || '';
+    } else {
+      finalAvatar = record.borrowerAvatar || '';
+      finalBuilding = record.borrowerBuilding || '';
     }
+
     Taro.navigateTo({
       url: `/pages/chat/index?userId=${targetId}&userName=${encodeURIComponent(targetName)}&userAvatar=${encodeURIComponent(finalAvatar)}&userBuilding=${encodeURIComponent(finalBuilding)}&itemId=${record.itemId}`
     });

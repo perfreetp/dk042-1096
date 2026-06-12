@@ -11,7 +11,7 @@ export interface User {
 
 export type ItemCategory = 'tools' | 'outdoor' | 'cleaning' | 'kitchen' | 'entertainment' | 'sports' | 'other';
 
-export type ItemStatus = 'available' | 'reserved' | 'lent' | 'maintenance';
+export type ItemStatus = 'available' | 'reserved' | 'lent' | 'maintenance' | 'offline';
 
 export interface Item {
   id: string;
@@ -48,8 +48,11 @@ export interface BorrowRecord {
   borrowerId: string;
   borrowerName: string;
   borrowerAvatar: string;
+  borrowerBuilding?: string;
   lenderId: string;
   lenderName: string;
+  lenderAvatar?: string;
+  lenderBuilding?: string;
   quantity: number;
   deposit: number;
   pickupTime: string;
@@ -125,7 +128,8 @@ export const statusMap: Record<ItemStatus, { text: string; color: string }> = {
   available: { text: '可借', color: '#52C41A' },
   reserved: { text: '已预约', color: '#FAAD14' },
   lent: { text: '已借出', color: '#FF4D4F' },
-  maintenance: { text: '维护中', color: '#86909C' }
+  maintenance: { text: '维护中', color: '#86909C' },
+  offline: { text: '已下架', color: '#BF5EE0' }
 };
 
 export const borrowStatusMap: Record<BorrowStatus, { text: string; color: string }> = {
@@ -137,5 +141,10 @@ export const borrowStatusMap: Record<BorrowStatus, { text: string; color: string
 };
 
 export function formatDeposit(amount: number): string {
-  return `¥${amount}`;
+  if (!amount && amount !== 0) return '¥0';
+  const num = Math.round(Number(amount) * 100) / 100;
+  if (Number.isInteger(num)) {
+    return `¥${num}`;
+  }
+  return `¥${num.toFixed(2)}`;
 }

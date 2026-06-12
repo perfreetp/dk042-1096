@@ -270,6 +270,18 @@
   color: $color-text-white;
 }
 
+.btnDanger {
+  background: $color-error-bg;
+  color: $color-error;
+  flex: 0.8;
+}
+
+.btnSuccess {
+  background: $color-success-bg;
+  color: $color-success;
+  flex: 0.8;
+}
+
 .timeTagRow {
   display: flex;
   flex-wrap: wrap;

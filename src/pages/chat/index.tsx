@@ -45,33 +45,27 @@ const ChatPage: React.FC = () => {
       if (found) return found;
     }
 
-    let finalName = userName || contactNameParam || '邻居';
+    let finalName = userName || contactNameParam || '';
     let finalAvatar = userAvatar || '';
     let finalBuilding = userBuilding || '';
     let finalRoom = '';
 
-    if (itemId) {
+    if (itemId && userId) {
       const allItems = useAppStore.getState().items;
       const relatedItem = allItems.find(i => i.id === itemId);
       if (relatedItem) {
-        if (!finalName || finalName === '邻居') {
-          finalName = relatedItem.ownerName || finalName;
-        }
-        if (!finalAvatar) {
-          finalAvatar = relatedItem.ownerAvatar || '';
-        }
-        if (!finalBuilding) {
-          finalBuilding = relatedItem.ownerBuilding || '';
+        const chatPartnerIsOwner = relatedItem.ownerId === userId;
+        if (chatPartnerIsOwner) {
+          if (!finalName) finalName = relatedItem.ownerName || '';
+          if (!finalAvatar) finalAvatar = relatedItem.ownerAvatar || '';
+          if (!finalBuilding) finalBuilding = relatedItem.ownerBuilding || '';
         }
       }
     }
 
-    if (!finalAvatar) {
-      finalAvatar = 'https://picsum.photos/id/1005/200/200';
-    }
-    if (!finalBuilding) {
-      finalBuilding = '邻居';
-    }
+    if (!finalName) finalName = '邻居';
+    if (!finalAvatar) finalAvatar = 'https://picsum.photos/id/1005/200/200';
+    if (!finalBuilding) finalBuilding = '';
 
     const targetUserId = userId || 'u' + Math.random().toString(36).slice(2, 8);
     return getOrCreateContact(targetUserId, {
@@ -273,8 +267,12 @@ const ChatPage: React.FC = () => {
             {isOnline && <View className={styles.onlineStatus} />}
           </View>
           <View className={styles.headerSub}>
-            <Text>{contact.building} {contact.roomNumber}</Text>
-            <Text>·</Text>
+            {contact.building ? (
+              <>
+                <Text>{contact.building} {contact.roomNumber}</Text>
+                <Text>·</Text>
+              </>
+            ) : null}
             <Text>{isOnline ? '在线' : '离线'}</Text>
           </View>
         </View>

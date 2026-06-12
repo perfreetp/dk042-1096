@@ -158,3 +158,16 @@
   font-weight: $font-weight-semibold;
   color: $color-deposit;
 }
+
+.manageBtn {
+  padding: 4rpx 20rpx;
+  background: $color-primary-bg;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-primary;
+}
+
+.manageText {
+  font-size: $font-size-xs;
+  color: $color-primary-dark;
+  font-weight: $font-weight-medium;
+}

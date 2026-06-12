@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Input, Textarea, Image, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
-import type { ItemCategory } from '@/types';
+import type { ItemCategory, Item } from '@/types';
 import { categoryMap } from '@/types';
 import useAppStore from '@/store';
 
@@ -29,7 +29,17 @@ const timeOptions = [
 const depositPresets = [0, 20, 50, 100, 200];
 
 const PublishPage: React.FC = () => {
+  const routerParams = Taro.useRouter().params;
+  const editItemId = routerParams.itemId || '';
+
+  const items = useAppStore(state => state.items);
   const addItem = useAppStore(state => state.addItem);
+  const updateItem = useAppStore(state => state.updateItem);
+  const offlineItem = useAppStore(state => state.offlineItem);
+  const onlineItem = useAppStore(state => state.onlineItem);
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editItem, setEditItem] = useState<Item | null>(null);
 
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState('');
@@ -40,6 +50,31 @@ const PublishPage: React.FC = () => {
   const [availableTime, setAvailableTime] = useState('周末全天');
   const [pickupLocation, setPickupLocation] = useState('');
   const [wearDesc, setWearDesc] = useState('');
+
+  useEffect(() => {
+    if (editItemId) {
+      const found = items.find(i => i.id === editItemId);
+      if (found) {
+        console.log('[Publish] Enter edit mode for item:', found.id, found.title);
+        setIsEditMode(true);
+        setEditItem(found);
+        setImages(found.images);
+        setTitle(found.title);
+        setDescription(found.description);
+        setCategory(found.category);
+        setQuantity(String(found.quantity));
+        setDeposit(String(found.deposit));
+        setAvailableTime(found.availableTime);
+        setPickupLocation(found.pickupLocation);
+        setWearDesc(found.wearDesc || '');
+        Taro.setNavigationBarTitle({ title: '编辑物品' }).catch(() => {});
+      } else {
+        Taro.showToast({ title: '物品不存在', icon: 'none' });
+      }
+    }
+  }, [editItemId, items]);
+
+  const lentCount = editItem ? Math.max(0, editItem.quantity - editItem.availableQuantity) : 0;
 
   const handleChooseImage = () => {
     if (images.length >= 6) {
@@ -58,16 +93,29 @@ const PublishPage: React.FC = () => {
   };
 
   const handleReset = () => {
-    setImages([]);
-    setTitle('');
-    setDescription('');
-    setCategory('tools');
-    setQuantity('1');
-    setDeposit('50');
-    setAvailableTime('周末全天');
-    setPickupLocation('');
-    setWearDesc('');
-    Taro.showToast({ title: '已重置', icon: 'success' });
+    if (isEditMode && editItem) {
+      setImages(editItem.images);
+      setTitle(editItem.title);
+      setDescription(editItem.description);
+      setCategory(editItem.category);
+      setQuantity(String(editItem.quantity));
+      setDeposit(String(editItem.deposit));
+      setAvailableTime(editItem.availableTime);
+      setPickupLocation(editItem.pickupLocation);
+      setWearDesc(editItem.wearDesc || '');
+      Taro.showToast({ title: '已恢复', icon: 'success' });
+    } else {
+      setImages([]);
+      setTitle('');
+      setDescription('');
+      setCategory('tools');
+      setQuantity('1');
+      setDeposit('50');
+      setAvailableTime('周末全天');
+      setPickupLocation('');
+      setWearDesc('');
+      Taro.showToast({ title: '已重置', icon: 'success' });
+    }
   };
 
   const handleQuantityChange = (e: any) => {
@@ -81,6 +129,10 @@ const PublishPage: React.FC = () => {
     if (num > 99) {
       setQuantity('99');
       Taro.showToast({ title: '数量最多99件', icon: 'none' });
+      return;
+    }
+    if (isEditMode && lentCount > 0 && num < lentCount) {
+      Taro.showToast({ title: `已有${lentCount}件借出，不能少于${lentCount}`, icon: 'none' });
       return;
     }
     setQuantity(cleaned);
@@ -107,100 +159,174 @@ const PublishPage: React.FC = () => {
     setDeposit(cleaned);
   };
 
-  const handleSubmit = () => {
-    console.log('[Publish] Submit form:', {
-      images, title, description, category, quantity,
-      deposit, availableTime, pickupLocation, wearDesc
-    });
-
+  const validateForm = () => {
     if (!title.trim()) {
       Taro.showToast({ title: '请输入物品名称', icon: 'none' });
-      return;
+      return false;
     }
     if (images.length === 0) {
       Taro.showToast({ title: '请至少上传一张图片', icon: 'none' });
-      return;
+      return false;
     }
     if (!pickupLocation.trim()) {
       Taro.showToast({ title: '请填写取还地点', icon: 'none' });
-      return;
+      return false;
     }
 
     const quantityClean = (quantity || '').trim();
     if (!quantityClean) {
       Taro.showToast({ title: '请填写数量', icon: 'none' });
-      return;
+      return false;
     }
     const quantityNum = parseInt(quantityClean, 10);
     if (!quantityNum || quantityNum <= 0 || isNaN(quantityNum)) {
       Taro.showToast({ title: '数量必须大于0', icon: 'none' });
-      return;
+      return false;
     }
     if (quantityNum > 99) {
       Taro.showToast({ title: '数量不能超过99件', icon: 'none' });
-      return;
+      return false;
+    }
+    if (isEditMode && lentCount > 0 && quantityNum < lentCount) {
+      Taro.showToast({ title: `已有${lentCount}件借出，不能少于${lentCount}件`, icon: 'none' });
+      return false;
     }
 
     const depositClean = (deposit || '').trim();
-    let depositNum = 0;
-    if (depositClean) {
-      depositNum = parseFloat(depositClean);
-      if (isNaN(depositNum) || depositNum < 0) {
-        Taro.showToast({ title: '押金不能为负数', icon: 'none' });
-        return;
-      }
-      if (depositNum > 9999) {
-        Taro.showToast({ title: '押金不能超过9999元', icon: 'none' });
-        return;
-      }
+    if (depositClean === '' || depositClean === '.') {
+      Taro.showToast({ title: '请填写押金（免费请选0）', icon: 'none' });
+      return false;
+    }
+    const depositNum = parseFloat(depositClean);
+    if (isNaN(depositNum) || depositNum < 0) {
+      Taro.showToast({ title: '押金不能为负数', icon: 'none' });
+      return false;
+    }
+    if (depositNum > 9999) {
+      Taro.showToast({ title: '押金不能超过9999元', icon: 'none' });
+      return false;
+    }
+    if (depositClean.startsWith('.') || depositClean.endsWith('.')) {
+      Taro.showToast({ title: '押金格式不正确', icon: 'none' });
+      return false;
     }
 
+    return true;
+  };
+
+  const handleSubmit = () => {
+    console.log('[Publish] Submit form:', { isEditMode, images, title, deposit });
+
+    if (!validateForm()) return;
+
+    const quantityNum = parseInt(quantity, 10);
+    const depositNum = parseFloat(deposit);
     const finalQuantity = Math.floor(quantityNum);
     const finalDeposit = Math.round(depositNum * 100) / 100;
 
     console.log('[Publish] Validated:', { finalQuantity, finalDeposit });
 
-    Taro.showLoading({ title: '发布中...', mask: true });
+    Taro.showLoading({ title: isEditMode ? '保存中...' : '发布中...', mask: true });
 
     try {
-      addItem({
-        title: title.trim(),
-        description: description.trim() || '暂无描述',
-        images,
-        category,
-        categoryName: categoryMap[category],
-        quantity: finalQuantity,
-        availableQuantity: finalQuantity,
-        deposit: finalDeposit,
-        availableTime,
-        pickupLocation: pickupLocation.trim(),
-        wearDesc: wearDesc.trim() || undefined,
-        tags: []
-      });
-
-      Taro.hideLoading();
-      Taro.showModal({
-        title: '发布成功',
-        content: '您的物品已成功发布，邻居们可以看到啦！',
-        showCancel: false,
-        confirmText: '好的',
-        success: () => {
-          Taro.switchTab({ url: '/pages/home/index' }).catch(() => {});
+      if (isEditMode && editItem) {
+        const result = updateItem(editItem.id, {
+          title: title.trim(),
+          description: description.trim() || '暂无描述',
+          images,
+          category,
+          categoryName: categoryMap[category],
+          quantity: finalQuantity,
+          deposit: finalDeposit,
+          availableTime,
+          pickupLocation: pickupLocation.trim(),
+          wearDesc: wearDesc.trim() || undefined
+        });
+        Taro.hideLoading();
+        if (result.success) {
+          Taro.showModal({
+            title: '修改成功',
+            content: '物品信息已更新，各页面会同步展示最新内容。',
+            showCancel: false,
+            confirmText: '好的',
+            confirmColor: '#52C41A',
+            success: () => {
+              Taro.navigateBack().catch(() => {
+                Taro.switchTab({ url: '/pages/mine/index' }).catch(() => {});
+              });
+            }
+          });
+        } else {
+          Taro.showToast({ title: result.message, icon: 'none' });
         }
-      });
+      } else {
+        addItem({
+          title: title.trim(),
+          description: description.trim() || '暂无描述',
+          images,
+          category,
+          categoryName: categoryMap[category],
+          quantity: finalQuantity,
+          availableQuantity: finalQuantity,
+          deposit: finalDeposit,
+          availableTime,
+          pickupLocation: pickupLocation.trim(),
+          wearDesc: wearDesc.trim() || undefined,
+          tags: []
+        });
+
+        Taro.hideLoading();
+        Taro.showModal({
+          title: '发布成功',
+          content: '您的物品已成功发布，邻居们可以看到啦！',
+          showCancel: false,
+          confirmText: '好的',
+          confirmColor: '#52C41A',
+          success: () => {
+            Taro.switchTab({ url: '/pages/home/index' }).catch(() => {});
+          }
+        });
+      }
     } catch (err) {
       console.error('[Publish] Error:', err);
       Taro.hideLoading();
-      Taro.showToast({ title: '发布失败，请重试', icon: 'none' });
+      Taro.showToast({ title: isEditMode ? '保存失败' : '发布失败，请重试', icon: 'none' });
+    }
+  };
+
+  const handleOffline = () => {
+    if (!editItem) return;
+    Taro.showModal({
+      title: '确认下架',
+      content: '下架后邻居将无法搜索和预约此物品，确认下架吗？',
+      confirmColor: '#BF5EE0',
+      success: (res) => {
+        if (res.confirm) {
+          const result = offlineItem(editItem.id);
+          Taro.showToast({ title: result.message, icon: result.success ? 'success' : 'none' });
+          if (result.success) {
+            setTimeout(() => {
+              Taro.navigateBack().catch(() => {});
+            }, 800);
+          }
+        }
+      }
+    });
+  };
+
+  const handleOnline = () => {
+    if (!editItem) return;
+    const result = onlineItem(editItem.id);
+    Taro.showToast({ title: result.message, icon: result.success ? 'success' : 'none' });
+    if (result.success) {
+      setTimeout(() => {
+        Taro.navigateBack().catch(() => {});
+      }, 800);
     }
   };
 
   const handleCategoryClick = (key: string) => {
     setCategory(key as ItemCategory);
-  };
-
-  const handlePresetDeposit = (amount: number) => {
-    setDeposit(amount.toString());
   };
 
   return (
@@ -209,6 +335,11 @@ const PublishPage: React.FC = () => {
         <View className={styles.sectionTitle}>
           <View className={styles.titleIcon}></View>
           <Text>物品照片</Text>
+          {isEditMode && editItem && (
+            <Text style={{ marginLeft: 'auto', fontSize: 24, color: '#86909C' }}>
+              {lentCount > 0 && `${lentCount}件借出中`}
+            </Text>
+          )}
         </View>
         <View className={styles.uploadGrid}>
           {images.map((img, index) => (
@@ -313,6 +444,11 @@ const PublishPage: React.FC = () => {
               <View className={styles.label}>
                 <Text className={styles.required}>*</Text>
                 <Text>数量（件）</Text>
+                {isEditMode && lentCount > 0 && (
+                  <Text style={{ fontSize: 22, color: '#FAAD14', marginLeft: 8 }}>
+                    （最少{lentCount}）
+                  </Text>
+                )}
               </View>
               <View className={styles.inputWrap}>
                 <Text className={styles.inputIcon}>📦</Text>
@@ -336,6 +472,8 @@ const PublishPage: React.FC = () => {
                   type="digit"
                   value={deposit}
                   onInput={handleDepositChange}
+                  placeholder="0 表示免费"
+                  placeholderClass={styles.textInput}
                 />
               </View>
             </View>
@@ -413,11 +551,21 @@ const PublishPage: React.FC = () => {
       </View>
 
       <View className={styles.bottomBar}>
+        {isEditMode && editItem && editItem.status !== 'offline' && (
+          <Button className={classnames(styles.btn, styles.btnDanger)} onClick={handleOffline}>
+            下架
+          </Button>
+        )}
+        {isEditMode && editItem && editItem.status === 'offline' && (
+          <Button className={classnames(styles.btn, styles.btnSuccess)} onClick={handleOnline}>
+            重新上架
+          </Button>
+        )}
         <Button className={classnames(styles.btn, styles.btnSecondary)} onClick={handleReset}>
-          重置
+          {isEditMode ? '恢复原值' : '重置'}
         </Button>
         <Button className={classnames(styles.btn, styles.btnPrimary)} onClick={handleSubmit}>
-          立即发布
+          {isEditMode ? '保存修改' : '立即发布'}
         </Button>
       </View>
     </View>

@@ -10,6 +10,7 @@ import { statusMap, formatDeposit } from '@/types';
 interface ItemCardProps {
   item: Item;
   showFavorite?: boolean;
+  showManage?: boolean;
   onFavorite?: (itemId: string) => void;
   onClick?: (itemId: string) => void;
 }
@@ -17,6 +18,7 @@ interface ItemCardProps {
 const ItemCard: React.FC<ItemCardProps> = ({
   item,
   showFavorite = true,
+  showManage = false,
   onFavorite,
   onClick
 }) => {
@@ -37,6 +39,13 @@ const ItemCard: React.FC<ItemCardProps> = ({
     if (onFavorite) {
       onFavorite(item.id);
     }
+  };
+
+  const handleEditClick = (e: any) => {
+    e.stopPropagation?.();
+    Taro.navigateTo({
+      url: `/pages/publish/index?itemId=${item.id}`
+    });
   };
 
   return (
@@ -83,8 +92,16 @@ const ItemCard: React.FC<ItemCardProps> = ({
             <Text className={styles.ownerName}>{item.ownerName}</Text>
           </View>
           <View className={styles.stats}>
-            <Text className={styles.stat}>借{item.borrowCount}次</Text>
-            <Text className={styles.deposit}>{formatDeposit(item.deposit)}</Text>
+            {showManage ? (
+              <View className={styles.manageBtn} onClick={handleEditClick}>
+                <Text className={styles.manageText}>管理</Text>
+              </View>
+            ) : (
+              <>
+                <Text className={styles.stat}>借{item.borrowCount}次</Text>
+                <Text className={styles.deposit}>{formatDeposit(item.deposit)}</Text>
+              </>
+            )}
           </View>
         </View>
       </View>

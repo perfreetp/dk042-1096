@@ -75,10 +75,10 @@ const HomePage: React.FC = () => {
     [items, activeCategory]
   );
 
-  const topItems = useMemo(() => items.filter(i => i.isTop), [items]);
+  const topItems = useMemo(() => items.filter(i => i.isTop && i.status !== 'offline'), [items]);
   const availableCount = useMemo(() => items.filter(i => i.status === 'available').length, [items]);
   const recommendItems = useMemo(() =>
-    items.filter(i => i.tags.some(t => t.includes('热门'))).slice(0, 6),
+    items.filter(i => i.tags.some(t => t.includes('热门')) && i.status !== 'offline').slice(0, 6),
     [items]
   );
 

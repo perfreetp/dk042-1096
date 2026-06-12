@@ -24,7 +24,8 @@ const statusOptions = [
   { key: 'available', name: '可借' },
   { key: 'reserved', name: '已预约' },
   { key: 'lent', name: '已借出' },
-  { key: 'maintenance', name: '维护中' }
+  { key: 'maintenance', name: '维护中' },
+  { key: 'offline', name: '已下架' }
 ];
 
 const depositRanges = [
@@ -247,6 +248,8 @@ const SearchPage: React.FC = () => {
                   key={item.id}
                   item={item}
                   onFavorite={handleFavorite}
+                  showManage={type === 'myItems'}
+                  showFavorite={type !== 'myItems'}
                 />
               ))}
             </View>

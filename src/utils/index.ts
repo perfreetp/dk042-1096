@@ -35,5 +35,10 @@ export function generateId(): string {
 }
 
 export function formatDeposit(amount: number): string {
-  return `¥${amount}`;
+  if (!amount && amount !== 0) return '¥0';
+  const num = Math.round(Number(amount) * 100) / 100;
+  if (Number.isInteger(num)) {
+    return `¥${num}`;
+  }
+  return `¥${num.toFixed(2)}`;
 }
