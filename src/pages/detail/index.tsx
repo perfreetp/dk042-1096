@@ -64,8 +64,10 @@ const DetailPage: React.FC = () => {
 
   const handleFavorite = () => {
     console.log('[Detail] Toggle favorite:', item.id);
-    const wasFavorited = item.isFavorite;
-    toggleFavorite(item.id);
+    const beforeState = useAppStore.getState();
+    const beforeItem = beforeState.items.find(i => i.id === itemId);
+    const wasFavorited = beforeItem?.isFavorite;
+    toggleFavorite(itemId);
     Taro.showToast({
       title: wasFavorited ? '已取消收藏' : '收藏成功',
       icon: 'success'

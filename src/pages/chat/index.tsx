@@ -45,14 +45,42 @@ const ChatPage: React.FC = () => {
       if (found) return found;
     }
 
+    let finalName = userName || contactNameParam || '邻居';
+    let finalAvatar = userAvatar || '';
+    let finalBuilding = userBuilding || '';
+    let finalRoom = '';
+
+    if (itemId) {
+      const allItems = useAppStore.getState().items;
+      const relatedItem = allItems.find(i => i.id === itemId);
+      if (relatedItem) {
+        if (!finalName || finalName === '邻居') {
+          finalName = relatedItem.ownerName || finalName;
+        }
+        if (!finalAvatar) {
+          finalAvatar = relatedItem.ownerAvatar || '';
+        }
+        if (!finalBuilding) {
+          finalBuilding = relatedItem.ownerBuilding || '';
+        }
+      }
+    }
+
+    if (!finalAvatar) {
+      finalAvatar = 'https://picsum.photos/id/1005/200/200';
+    }
+    if (!finalBuilding) {
+      finalBuilding = '邻居';
+    }
+
     const targetUserId = userId || 'u' + Math.random().toString(36).slice(2, 8);
     return getOrCreateContact(targetUserId, {
-      name: userName || contactNameParam || '邻居',
-      avatar: userAvatar || 'https://picsum.photos/id/1005/200/200',
-      building: userBuilding || '',
-      roomNumber: ''
+      name: finalName,
+      avatar: finalAvatar,
+      building: finalBuilding,
+      roomNumber: finalRoom
     });
-  }, [contactId, userId, userName, userAvatar, userBuilding, contactNameParam, getOrCreateContact]);
+  }, [contactId, userId, userName, userAvatar, userBuilding, contactNameParam, itemId, getOrCreateContact]);
 
   const relatedItem = useMemo(() => {
     if (!itemId) return null;

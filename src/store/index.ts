@@ -4,6 +4,16 @@ import { borrowRecordsData } from '@/data/borrowRecords';
 import { contactsData, currentUser as currentUserData } from '@/data/user';
 import type { Item, BorrowRecord, Contact, User } from '@/types';
 import { generateId } from '@/utils';
+import Taro from '@tarojs/taro';
+
+const STORAGE_KEY = 'neighbor_share_app_state_v1';
+
+interface PersistState {
+  items: Item[];
+  borrowRecords: BorrowRecord[];
+  contacts: Contact[];
+  frozenDeposits: number;
+}
 
 interface AppState {
   items: Item[];
@@ -11,6 +21,11 @@ interface AppState {
   contacts: Contact[];
   currentUser: User;
   frozenDeposits: number;
+
+  _loaded: boolean;
+
+  _hydrate: () => void;
+  _persist: () => void;
 
   addItem: (item: Omit<Item, 'id' | 'ownerId' | 'ownerName' | 'ownerAvatar' | 'ownerBuilding' | 'status' | 'borrowCount' | 'createdAt'> & { images: string[] }) => void;
   toggleFavorite: (itemId: string) => void;
@@ -34,7 +49,7 @@ interface AppState {
   addRating: (recordId: string, rating: number, comment: string) => void;
   addDamageNote: (recordId: string, note: string) => void;
 
-  addContact: (contact: Omit<Contact, 'id'>) => void;
+  addContact: (contact: Omit<Contact, 'id'>) => Contact;
   getOrCreateContact: (userId: string, userData: Partial<Contact>) => Contact;
 }
 
@@ -44,10 +59,60 @@ const useAppStore = create<AppState>((set, get) => ({
   contacts: contactsData,
   currentUser: currentUserData,
   frozenDeposits: 130,
+  _loaded: false,
+
+  _hydrate: () => {
+    try {
+      const raw = Taro.getStorageSync(STORAGE_KEY);
+      if (raw && typeof raw === 'string' && raw.length > 0) {
+        const parsed = JSON.parse(raw) as PersistState;
+        if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+          console.log('[Store] Hydrated from storage, items count:', parsed.items.length);
+          set({
+            items: parsed.items,
+            borrowRecords: parsed.borrowRecords || borrowRecordsData,
+            contacts: parsed.contacts || contactsData,
+            frozenDeposits: typeof parsed.frozenDeposits === 'number' ? parsed.frozenDeposits : 130,
+            _loaded: true
+          });
+          return;
+        }
+      }
+      console.log('[Store] No valid persisted state, using default data');
+      set({ _loaded: true });
+    } catch (err) {
+      console.error('[Store] Hydrate error:', err);
+      set({ _loaded: true });
+    }
+  },
+
+  _persist: () => {
+    try {
+      const state = get();
+      const toSave: PersistState = {
+        items: state.items,
+        borrowRecords: state.borrowRecords,
+        contacts: state.contacts,
+        frozenDeposits: state.frozenDeposits
+      };
+      Taro.setStorageSync(STORAGE_KEY, JSON.stringify(toSave));
+    } catch (err) {
+      console.error('[Store] Persist error:', err);
+    }
+  },
 
   addItem: (itemData) => {
     console.log('[Store] Adding new item:', itemData.title);
     const state = get();
+    if (!state._loaded) state._hydrate();
+
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    const quantitySafe = Math.max(1, Math.min(99, Math.floor(itemData.quantity || 1)));
+    const depositSafe = Math.max(0, Math.floor((itemData as any).deposit || 0));
+    const availQtySafe = Math.max(0, Math.min(quantitySafe, Math.floor((itemData as any).availableQuantity ?? quantitySafe)));
+
     const newItem: Item = {
       ...itemData,
       id: generateId(),
@@ -55,16 +120,20 @@ const useAppStore = create<AppState>((set, get) => ({
       ownerName: state.currentUser.name,
       ownerAvatar: state.currentUser.avatar,
       ownerBuilding: state.currentUser.building,
-      status: 'available',
+      status: availQtySafe > 0 ? 'available' : 'reserved',
+      quantity: quantitySafe,
+      availableQuantity: availQtySafe,
+      deposit: depositSafe,
       borrowCount: 0,
       isFavorite: false,
       isTop: false,
-      createdAt: new Date().toISOString().split('T')[0],
+      createdAt: dateStr,
       tags: itemData.tags || []
     };
     set((state) => ({
       items: [newItem, ...state.items]
     }));
+    get()._persist();
     console.log('[Store] Item added with id:', newItem.id);
   },
 
@@ -75,6 +144,7 @@ const useAppStore = create<AppState>((set, get) => ({
         item.id === itemId ? { ...item, isFavorite: !item.isFavorite } : item
       )
     }));
+    get()._persist();
   },
 
   isFavorite: (itemId) => {
@@ -117,13 +187,17 @@ const useAppStore = create<AppState>((set, get) => ({
       return { success: false, message: '物品正在维护中，暂时无法预约' };
     }
 
-    if (item.availableQuantity < params.quantity) {
+    const qtySafe = Math.max(1, Math.min(item.availableQuantity, Math.floor(params.quantity || 1)));
+
+    if (item.availableQuantity < qtySafe) {
       return { success: false, message: '可借数量不足' };
     }
 
     if (item.ownerId === state.currentUser.id) {
       return { success: false, message: '不能预约自己发布的物品' };
     }
+
+    const depositSafe = Math.max(0, item.deposit) * qtySafe;
 
     const newRecord: BorrowRecord = {
       id: generateId(),
@@ -135,8 +209,8 @@ const useAppStore = create<AppState>((set, get) => ({
       borrowerAvatar: state.currentUser.avatar,
       lenderId: item.ownerId,
       lenderName: item.ownerName,
-      quantity: params.quantity,
-      deposit: item.deposit * params.quantity,
+      quantity: qtySafe,
+      deposit: depositSafe,
       pickupTime: params.pickupTime,
       expectedReturnTime: params.expectedReturnTime,
       status: 'pending_pickup',
@@ -146,19 +220,22 @@ const useAppStore = create<AppState>((set, get) => ({
       createdAt: new Date().toISOString()
     };
 
+    const newAvailQty = Math.max(0, item.availableQuantity - qtySafe);
+
     set((state) => ({
       borrowRecords: [newRecord, ...state.borrowRecords],
       items: state.items.map((i) =>
         i.id === params.itemId
           ? {
               ...i,
-              availableQuantity: i.availableQuantity - params.quantity,
-              status: i.availableQuantity - params.quantity <= 0 ? 'reserved' : i.status
+              availableQuantity: newAvailQty,
+              status: newAvailQty <= 0 ? 'reserved' : i.status
             }
           : i
       ),
-      frozenDeposits: state.frozenDeposits + item.deposit * params.quantity
+      frozenDeposits: state.frozenDeposits + depositSafe
     }));
+    get()._persist();
 
     console.log('[Store] Borrow record created:', newRecord.id);
     return { success: true, message: '预约成功', record: newRecord };
@@ -185,13 +262,14 @@ const useAppStore = create<AppState>((set, get) => ({
         i.id === record.itemId
           ? {
               ...i,
-              availableQuantity: i.availableQuantity + record.quantity,
+              availableQuantity: Math.min(i.quantity, i.availableQuantity + record.quantity),
               status: 'available'
             }
           : i
       ),
       frozenDeposits: Math.max(0, state.frozenDeposits - record.deposit)
     }));
+    get()._persist();
     console.log('[Store] Record cancelled');
   },
 
@@ -209,10 +287,11 @@ const useAppStore = create<AppState>((set, get) => ({
       ),
       items: state.items.map((i) =>
         i.id === record.itemId
-          ? { ...i, status: 'lent', borrowCount: i.borrowCount + 1 }
+          ? { ...i, status: 'lent', borrowCount: (i.borrowCount || 0) + 1 }
           : i
       )
     }));
+    get()._persist();
     console.log('[Store] Pickup confirmed');
   },
 
@@ -220,7 +299,11 @@ const useAppStore = create<AppState>((set, get) => ({
     console.log('[Store] Confirm return:', recordId);
     const state = get();
     const record = state.borrowRecords.find((r) => r.id === recordId);
-    if (!record || record.status !== 'borrowing' && record.status !== 'overdue') return;
+    if (!record) return;
+    if (record.status !== 'borrowing' && record.status !== 'overdue') return;
+
+    const actualReturn = new Date();
+    const actualReturnStr = `${actualReturn.getFullYear()}-${String(actualReturn.getMonth() + 1).padStart(2, '0')}-${String(actualReturn.getDate()).padStart(2, '0')} ${String(actualReturn.getHours()).padStart(2, '0')}:${String(actualReturn.getMinutes()).padStart(2, '0')}`;
 
     set((state) => ({
       borrowRecords: state.borrowRecords.map((r) =>
@@ -229,7 +312,7 @@ const useAppStore = create<AppState>((set, get) => ({
               ...r,
               status: 'returned',
               statusText: '已归还',
-              actualReturnTime: new Date().toISOString()
+              actualReturnTime: actualReturnStr
             }
           : r
       ),
@@ -237,13 +320,14 @@ const useAppStore = create<AppState>((set, get) => ({
         i.id === record.itemId
           ? {
               ...i,
-              availableQuantity: i.availableQuantity + record.quantity,
+              availableQuantity: Math.min(i.quantity, i.availableQuantity + record.quantity),
               status: 'available'
             }
           : i
       ),
       frozenDeposits: Math.max(0, state.frozenDeposits - record.deposit)
     }));
+    get()._persist();
     console.log('[Store] Return confirmed');
   },
 
@@ -255,22 +339,25 @@ const useAppStore = create<AppState>((set, get) => ({
           ? {
               ...r,
               hasExtendRequest: true,
-              extendCount: r.extendCount + 1
+              extendCount: (r.extendCount || 0) + 1
             }
           : r
       )
     }));
+    get()._persist();
   },
 
   addRating: (recordId, rating, comment) => {
     console.log('[Store] Add rating:', recordId, rating, comment);
+    const ratingSafe = Math.max(1, Math.min(5, Math.floor(rating)));
     set((state) => ({
       borrowRecords: state.borrowRecords.map((r) =>
         r.id === recordId
-          ? { ...r, rating, comment }
+          ? { ...r, rating: ratingSafe, comment: comment || undefined }
           : r
       )
     }));
+    get()._persist();
   },
 
   addDamageNote: (recordId, note) => {
@@ -282,6 +369,7 @@ const useAppStore = create<AppState>((set, get) => ({
           : r
       )
     }));
+    get()._persist();
   },
 
   addContact: (contactData) => {
@@ -293,6 +381,7 @@ const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       contacts: [newContact, ...state.contacts]
     }));
+    get()._persist();
     return newContact;
   },
 
@@ -306,7 +395,7 @@ const useAppStore = create<AppState>((set, get) => ({
       userId,
       name: userData.name || '邻居',
       avatar: userData.avatar || 'https://picsum.photos/id/1005/200/200',
-      building: userData.building || '',
+      building: userData.building || '未知楼栋',
       roomNumber: userData.roomNumber || '',
       phone: userData.phone,
       lastMessage: '',
@@ -317,6 +406,7 @@ const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       contacts: [newContact, ...state.contacts]
     }));
+    get()._persist();
 
     console.log('[Store] Created new contact:', newContact.name);
     return newContact;

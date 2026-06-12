@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { View, Text, ScrollView, Input } from '@tarojs/components';
+import React, { useState, useMemo } from 'react';
+import { View, Text, ScrollView, Button, Textarea } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
@@ -29,6 +29,7 @@ const BorrowPage: React.FC = () => {
   const requestExtend = useAppStore(state => state.requestExtend);
   const addRating = useAppStore(state => state.addRating);
   const addDamageNote = useAppStore(state => state.addDamageNote);
+  const items = useAppStore(state => state.items);
 
   const [activeTab, setActiveTab] = useState<TabType>('borrow');
   const [activeStatus, setActiveStatus] = useState<FilterStatus>('all');
@@ -146,12 +147,20 @@ const BorrowPage: React.FC = () => {
 
   const handleChat = (record: BorrowRecord) => {
     console.log('[Borrow] Chat for record:', record.id);
-    const targetId = activeTab === 'borrow' ? record.lenderId : record.borrowerId;
-    const targetName = activeTab === 'borrow' ? record.lenderName : record.borrowerName;
-    const targetAvatar = activeTab === 'borrow' ? '' : record.borrowerAvatar;
+    const isBorrower = activeTab === 'borrow';
+    const targetId = isBorrower ? record.lenderId : record.borrowerId;
+    const targetName = isBorrower ? record.lenderName : record.borrowerName;
+    const targetAvatar = isBorrower ? '' : record.borrowerAvatar;
     const targetBuilding = '';
+    const item = items.find(i => i.id === record.itemId);
+    let finalAvatar = targetAvatar;
+    let finalBuilding = targetBuilding;
+    if (isBorrower && item) {
+      finalAvatar = item.ownerAvatar;
+      finalBuilding = item.ownerBuilding;
+    }
     Taro.navigateTo({
-      url: `/pages/chat/index?userId=${targetId}&userName=${encodeURIComponent(targetName)}&userAvatar=${encodeURIComponent(targetAvatar)}&userBuilding=${encodeURIComponent(targetBuilding)}&itemId=${record.itemId}`
+      url: `/pages/chat/index?userId=${targetId}&userName=${encodeURIComponent(targetName)}&userAvatar=${encodeURIComponent(finalAvatar)}&userBuilding=${encodeURIComponent(finalBuilding)}&itemId=${record.itemId}`
     });
   };
 

@@ -70,6 +70,43 @@ const PublishPage: React.FC = () => {
     Taro.showToast({ title: '已重置', icon: 'success' });
   };
 
+  const handleQuantityChange = (e: any) => {
+    const val = e.detail.value || '';
+    const cleaned = val.replace(/[^\d]/g, '');
+    if (!cleaned) {
+      setQuantity('');
+      return;
+    }
+    const num = parseInt(cleaned, 10);
+    if (num > 99) {
+      setQuantity('99');
+      Taro.showToast({ title: '数量最多99件', icon: 'none' });
+      return;
+    }
+    setQuantity(cleaned);
+  };
+
+  const handleDepositChange = (e: any) => {
+    const val = e.detail.value || '';
+    const cleaned = val.replace(/[^\d.]/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      return;
+    }
+    if (parts[1] && parts[1].length > 2) {
+      return;
+    }
+    if (cleaned) {
+      const num = parseFloat(cleaned);
+      if (num > 9999) {
+        setDeposit('9999');
+        Taro.showToast({ title: '押金最多9999元', icon: 'none' });
+        return;
+      }
+    }
+    setDeposit(cleaned);
+  };
+
   const handleSubmit = () => {
     console.log('[Publish] Submit form:', {
       images, title, description, category, quantity,
@@ -89,8 +126,39 @@ const PublishPage: React.FC = () => {
       return;
     }
 
-    const quantityNum = parseInt(quantity, 10) || 1;
-    const depositNum = parseFloat(deposit) || 0;
+    const quantityClean = (quantity || '').trim();
+    if (!quantityClean) {
+      Taro.showToast({ title: '请填写数量', icon: 'none' });
+      return;
+    }
+    const quantityNum = parseInt(quantityClean, 10);
+    if (!quantityNum || quantityNum <= 0 || isNaN(quantityNum)) {
+      Taro.showToast({ title: '数量必须大于0', icon: 'none' });
+      return;
+    }
+    if (quantityNum > 99) {
+      Taro.showToast({ title: '数量不能超过99件', icon: 'none' });
+      return;
+    }
+
+    const depositClean = (deposit || '').trim();
+    let depositNum = 0;
+    if (depositClean) {
+      depositNum = parseFloat(depositClean);
+      if (isNaN(depositNum) || depositNum < 0) {
+        Taro.showToast({ title: '押金不能为负数', icon: 'none' });
+        return;
+      }
+      if (depositNum > 9999) {
+        Taro.showToast({ title: '押金不能超过9999元', icon: 'none' });
+        return;
+      }
+    }
+
+    const finalQuantity = Math.floor(quantityNum);
+    const finalDeposit = Math.round(depositNum * 100) / 100;
+
+    console.log('[Publish] Validated:', { finalQuantity, finalDeposit });
 
     Taro.showLoading({ title: '发布中...', mask: true });
 
@@ -101,9 +169,9 @@ const PublishPage: React.FC = () => {
         images,
         category,
         categoryName: categoryMap[category],
-        quantity: quantityNum,
-        availableQuantity: quantityNum,
-        deposit: depositNum,
+        quantity: finalQuantity,
+        availableQuantity: finalQuantity,
+        deposit: finalDeposit,
         availableTime,
         pickupLocation: pickupLocation.trim(),
         wearDesc: wearDesc.trim() || undefined,
@@ -252,7 +320,7 @@ const PublishPage: React.FC = () => {
                   className={styles.textInput}
                   type="number"
                   value={quantity}
-                  onInput={e => setQuantity(e.detail.value)}
+                  onInput={handleQuantityChange}
                 />
               </View>
             </View>
@@ -267,7 +335,7 @@ const PublishPage: React.FC = () => {
                   className={styles.textInput}
                   type="digit"
                   value={deposit}
-                  onInput={e => setDeposit(e.detail.value)}
+                  onInput={handleDepositChange}
                 />
               </View>
             </View>
@@ -276,8 +344,10 @@ const PublishPage: React.FC = () => {
             {depositPresets.map(amount => (
               <View
                 key={amount}
-                className={classnames(styles.depositPreset, deposit === amount.toString() && styles.active)}
-                onClick={() => handlePresetDeposit(amount)}
+                className={classnames(styles.depositPreset, deposit === String(amount) && styles.active)}
+                onClick={() => {
+                  setDeposit(String(amount));
+                }}
               >
                 <Text>{amount === 0 ? '免押' : `¥${amount}`}</Text>
               </View>

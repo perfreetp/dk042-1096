@@ -46,10 +46,12 @@ const HomePage: React.FC = () => {
 
   const handleFavorite = (itemId: string) => {
     console.log('[Home] Toggling favorite for item:', itemId);
+    const beforeState = useAppStore.getState();
+    const item = beforeState.items.find(i => i.id === itemId);
+    const wasFav = item?.isFavorite;
     toggleFavorite(itemId);
-    const isFav = items.find(i => i.id === itemId)?.isFavorite;
     Taro.showToast({
-      title: isFav ? '已取消收藏' : '已收藏',
+      title: wasFav ? '已取消收藏' : '已收藏',
       icon: 'success'
     });
   };

@@ -113,10 +113,12 @@ const SearchPage: React.FC = () => {
 
   const handleFavorite = (itemId: string) => {
     console.log('[Search] Toggle favorite:', itemId);
-    const item = items.find(i => i.id === itemId);
+    const beforeState = useAppStore.getState();
+    const item = beforeState.items.find(i => i.id === itemId);
+    const wasFav = item?.isFavorite;
     toggleFavorite(itemId);
     Taro.showToast({
-      title: item?.isFavorite ? '已取消收藏' : '已收藏',
+      title: wasFav ? '已取消收藏' : '已收藏',
       icon: 'success'
     });
   };
@@ -243,7 +245,7 @@ const SearchPage: React.FC = () => {
               {filteredItems.map(item => (
                 <ItemCard
                   key={item.id}
-                  item={{ ...item, isFavorite: favoriteMap[item.id] ?? item.isFavorite }}
+                  item={item}
                   onFavorite={handleFavorite}
                 />
               ))}
